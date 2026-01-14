@@ -1,25 +1,12 @@
-export type ITaskPriority = "LOW" | "NORMAL" | "HIGH" | "NONE";
-
-export interface ISubtask {
-	id: string;
-	taskId: string;
-	title: string;
-	description?: string | null;
-	position: number;
-	isCompleted: boolean;
-	createdAt: string;
-	updatedAt?: string | null;
-}
+import { ISubtask } from "./subtask";
+import { IRecurrenceRule } from "./recurrence-rule";
+import { ITaskDefinition } from "./task-definition";
+import { ITaskOccurrence } from "./task-occurrence";
 
 export interface ITask {
 	id: string;
-	title: string;
-	description?: string | null;
-	priority: ITaskPriority;
-	isStarred: boolean;
-	dateTime?: string | null;
-	isCompleted: boolean;
-	createdAt: string;
-	updatedAt?: string | null;
-	subtasks?: ISubtask[] | null;
+	taskDefinition: ITaskDefinition;
+	recurrenceRule: IRecurrenceRule;
+	occurrences?: Array<ITaskOccurrence> | null;
+	subtasks?: Array<ISubtask> | null;
 }

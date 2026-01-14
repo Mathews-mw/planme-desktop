@@ -1,3 +1,8 @@
+import dayjs from "dayjs";
+import { Fragment, useMemo } from "react";
+
+import { type IRecurrenceData } from "./create-task-sheet";
+
 import { Button } from "../ui/button";
 import {
 	DropdownMenu,
@@ -7,9 +12,8 @@ import {
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
-import { IconCalendarRepeat, IconReload } from "@tabler/icons-react";
-import { IRecurrenceData } from "./create-task-sheet";
 import { X } from "lucide-react";
+import { IconCalendarRepeat, IconReload } from "@tabler/icons-react";
 
 interface IProps {
 	recurrenceData: IRecurrenceData | undefined;
@@ -18,6 +22,49 @@ interface IProps {
 }
 
 export function RecurrenceDropdown({ recurrenceData, onRemoveRecurrence, onShowRecurrenceDialog }: IProps) {
+	const recurrenceLabel = useMemo((): { repetition: string; ends?: string } => {
+		let result: { repetition: string; ends?: string } = { repetition: "No recurrence" };
+
+		if (!recurrenceData) {
+			return result;
+		}
+
+		switch (recurrenceData.frequency) {
+			case "DAILY_INTERVAL":
+				result = { repetition: `Repeats every ${recurrenceData.interval ?? 1} day(s)` };
+				break;
+			case "MONTHLY_DAY_OF_MONTH":
+				result = { repetition: `Repeats each month on day ${recurrenceData.dayOfMonth}` };
+				break;
+			case "WEEKLY_DAYS":
+				result = { repetition: `Repeats every week on selected days:` };
+				break;
+			case "YEARLY_INTERVAL":
+				result = { repetition: `Repeats every ${recurrenceData.interval ?? 1} year(s)` };
+				break;
+			case "NONE":
+				result = { repetition: "No recurrence" };
+				break;
+			default:
+				result = { repetition: "No recurrence" };
+				break;
+		}
+
+		switch (recurrenceData.recurrenceEndType) {
+			case "NEVER":
+				result = { ...result, ends: "Never ends" };
+				break;
+			case "AFTER_OCCURRENCES":
+				result = { ...result, ends: `Ends after ${recurrenceData.maxOccurrences ?? 1} occurrences` };
+				break;
+			case "ON_DATE":
+				result = { ...result, ends: `Ends on ${dayjs(recurrenceData.endDate!).format("MMMM DD, YYYY")}` };
+				break;
+		}
+
+		return result;
+	}, [recurrenceData]);
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -25,19 +72,22 @@ export function RecurrenceDropdown({ recurrenceData, onRemoveRecurrence, onShowR
 					<div className="relative z-0 flex gap-2 rounded-md bg-secondary px-3 py-2 text-sm">
 						<IconCalendarRepeat className="size-5 text-sky-500" />
 						<div className="flex flex-col">
-							<span className="font-semibold">{`Repeats each ${recurrenceData.frequency} ${recurrenceData.type}`}</span>
+							<span className="font-semibold">{recurrenceLabel.repetition}</span>
+
 							{recurrenceData.weekdays && recurrenceData.weekdays.length > 0 && (
 								<div>
 									{recurrenceData.weekdays.map((weekday, index) => (
-										<>
+										<Fragment key={weekday.value}>
 											<span className="text-muted-foreground">{weekday.label.slice(0, 3)}</span>
 											{index + 1 !== recurrenceData.weekdays?.length && (
 												<span className="text-muted-foreground">, </span>
 											)}
-										</>
+										</Fragment>
 									))}
 								</div>
 							)}
+
+							{recurrenceLabel.ends && <span className="text-sm text-muted-foreground">{recurrenceLabel.ends}</span>}
 						</div>
 
 						<Button

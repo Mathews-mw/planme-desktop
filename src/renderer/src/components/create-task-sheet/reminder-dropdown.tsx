@@ -92,6 +92,6 @@ function buildReminderDateTime(dateTime: NonNullable<IDateTime>) {
 		Number(dateTime.hour),
 		Number(dateTime.minute),
 		0,
-		0
+		0,
 	);
 }

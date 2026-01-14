@@ -1,3 +1,7 @@
+import { ITask } from "./task";
+import { ITaskPriority } from "./task-definition";
+import { IRecurrenceEndType, IRecurrenceFrequency } from "./recurrence-rule";
+
 // ===IPC Errors ===
 
 export type IpcErrorCode =
@@ -17,21 +21,29 @@ export type IpcError = {
 	details?: unknown;
 };
 
-// O segredo está aqui: success: true OU success: false
 export type IpcResponse<T> =
 	| { success: true; data: T; error?: never }
 	| { success: false; error: IpcError; data?: never };
 
 // ===Request===
 
-import { ITask, ITaskPriority } from "./task";
-
 export interface ICreateTaskRequest {
-	title: string;
-	description?: string | null;
-	priority?: ITaskPriority;
-	isStarred?: boolean;
-	dateTime?: string | null;
+	definition: {
+		title: string;
+		description?: string | null;
+		priority?: ITaskPriority;
+		deadline?: Date | null;
+	};
+	recurrenceRule: {
+		frequency?: IRecurrenceFrequency;
+		endType?: IRecurrenceEndType;
+		startDateTime?: Date | null;
+		endDate?: Date | null;
+		interval?: number | null;
+		weekdays?: number | null;
+		dayOfMonth?: number | null;
+		maxOccurrences?: number | null;
+	};
 }
 
 export type ISaveTaskRequest = ITask;

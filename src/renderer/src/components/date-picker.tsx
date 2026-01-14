@@ -2,10 +2,15 @@ import * as React from "react";
 import { CalendarIcon } from "lucide-react";
 
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+
+interface IProps {
+	disabled?: boolean;
+	date?: Date;
+	onselectDate?: (date: Date) => void;
+}
 
 function formatDate(date: Date | undefined) {
 	if (!date) {
@@ -26,9 +31,8 @@ function isValidDate(date: Date | undefined) {
 	return !isNaN(date.getTime());
 }
 
-export function DatePicker() {
-	const [open, setOpen] = React.useState(false);
-	const [date, setDate] = React.useState<Date | undefined>(new Date());
+export function DatePicker({ disabled, date = new Date(), onselectDate }: IProps) {
+	const [openDatePicker, setOpenDatePicker] = React.useState(false);
 	const [month, setMonth] = React.useState<Date | undefined>(date);
 	const [value, setValue] = React.useState(formatDate(date));
 
@@ -37,6 +41,7 @@ export function DatePicker() {
 			<div className="relative flex gap-2">
 				<Input
 					id="date"
+					disabled={disabled}
 					value={value}
 					placeholder="Select date"
 					className="bg-background pr-10"
@@ -44,45 +49,45 @@ export function DatePicker() {
 						const date = new Date(e.target.value);
 						setValue(e.target.value);
 						if (isValidDate(date)) {
-							setDate(date);
 							setMonth(date);
 						}
 					}}
 					onKeyDown={(e) => {
 						if (e.key === "ArrowDown") {
 							e.preventDefault();
-							setOpen(true);
+
+							setOpenDatePicker(true);
 						}
 					}}
 				/>
-				<Popover open={open} onOpenChange={setOpen}>
+				<Popover open={openDatePicker} onOpenChange={setOpenDatePicker}>
 					<PopoverTrigger asChild>
 						<Button
 							id="date-picker"
 							variant="ghost"
 							type="button"
+							disabled={disabled}
 							className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
 						>
 							<CalendarIcon className="size-3.5" />
 							<span className="sr-only">Select date</span>
 						</Button>
 					</PopoverTrigger>
-					<PopoverContent
-						className="w-auto overflow-hidden p-0"
-						align="end"
-						alignOffset={-8}
-						sideOffset={10}
-					>
+					<PopoverContent className="w-auto overflow-hidden p-0" align="end" alignOffset={-8} sideOffset={10}>
 						<Calendar
 							mode="single"
 							selected={date}
 							captionLayout="dropdown"
 							month={month}
+							disabled={{ before: new Date() }}
 							onMonthChange={setMonth}
+							startMonth={new Date()}
 							onSelect={(date) => {
-								setDate(date);
 								setValue(formatDate(date));
-								setOpen(false);
+								setOpenDatePicker(false);
+								if (date) {
+									onselectDate?.(date);
+								}
 							}}
 						/>
 					</PopoverContent>

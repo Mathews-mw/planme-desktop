@@ -1,18 +1,26 @@
 import z from "zod";
+import dayjs from "dayjs";
 import { toast } from "sonner";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { queryClient } from "../../lib/query-client";
 import { errorHandler } from "../../_api/error-handler/error-handler";
 import { taskRepository } from "../../../repositories/tasks-repository";
+import { type ITaskPriority } from "~/src/shared/types/task-definition";
+import type { IRecurrenceEndType, IRecurrenceFrequency } from "~/src/shared/types/recurrence-rule";
 
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
-
+import { ReminderDialog } from "./reminder-dialog";
+import { ReminderDropdown } from "./reminder-dropdown";
+import { RecurrenceDialog } from "./recurrence-dialog";
+import { RecurrenceDropdown } from "./recurrence-dropdown";
+import { PickEndDateDialog } from "./pick-end-date-dialog";
 import {
 	Sheet,
 	SheetClose,
@@ -24,16 +32,8 @@ import {
 	SheetTrigger,
 } from "../ui/sheet";
 
-import { useState } from "react";
-import { ReminderDialog } from "./reminder-dialog";
-
 import { Plus, X } from "lucide-react";
-import { ReminderDropdown } from "./reminder-dropdown";
-import { RecurrenceDropdown } from "./recurrence-dropdown";
-import { RecurrenceDialog } from "./recurrence-dialog";
-import { PickEndDateDialog } from "./pick-end-date-dialog";
 import { IconCalendarCheck } from "@tabler/icons-react";
-import dayjs from "dayjs";
 
 export interface IDateTime {
 	date: Date;
@@ -42,23 +42,34 @@ export interface IDateTime {
 }
 
 export interface IRecurrenceData {
-	frequency: number;
-	type: string;
+	frequency: IRecurrenceFrequency;
+	interval?: number;
+	dayOfMonth?: number;
 	weekdays?: Array<{ value: number; label: string }>;
+	recurrenceEndType?: IRecurrenceEndType;
+	endDate?: Date;
+	maxOccurrences?: number;
 }
 
 const formSchema = z.object({
 	title: z.string({ error: "Please, provide a title" }).min(1, { message: "Please, provide a title" }),
 	description: z.optional(z.string()),
-	date: z.string().optional(),
-	time: z.string().optional(),
+	// date: z.string().optional(),
+	// time: z.string().optional(),
+	// endDate: z.string().optional(),
+	// priority: z.string().optional(),
+	// frequency: z.string(),
+	// endType: z.string().optional(),
+	// interval: z.string().optional(),
+	// maxOccurrences: z.string().optional(),
+	// dayOfMonth: z.string().optional(),
+	// weekdays: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export function CreateTaskSheet() {
 	const {
-		control,
 		register,
 		handleSubmit,
 		reset,
@@ -70,6 +81,7 @@ export function CreateTaskSheet() {
 	const [showReminderDialog, setShowReminderDialog] = useState(false);
 	const [showRecurrenceDialog, setShowRecurrenceDialog] = useState(false);
 	const [showPickEndDateDialog, setShowPickEndDateDialog] = useState(false);
+
 	const [dateTime, setDateTime] = useState<IDateTime | undefined>(undefined);
 	const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 	const [recurrence, setRecurrence] = useState<IRecurrenceData | undefined>(undefined);
@@ -84,9 +96,21 @@ export function CreateTaskSheet() {
 	async function handleCreateTask(data: FormData) {
 		try {
 			const result = await createTaskFn({
-				title: data.title,
-				description: data.description ?? null,
-				dateTime: data.date && data.time ? new Date(`${data.date}T${data.time}:00.000Z`).toISOString() : null,
+				definition: {
+					title: data.title,
+					description: data.description ?? null,
+					priority: data.priority ? (data.priority as ITaskPriority) : undefined,
+				},
+				recurrenceRule: {
+					startDateTime: data.date && data.time ? new Date(`${data.date}T${data.time}:00.000Z`) : null,
+					frequency: data.frequency ? (data.frequency as IRecurrenceFrequency) : undefined,
+					endType: data.endType ? (data.endType as IRecurrenceEndType) : undefined,
+					interval: data.interval ? Number(data.interval) : undefined,
+					maxOccurrences: data.maxOccurrences ? Number(data.maxOccurrences) : undefined,
+					dayOfMonth: data.dayOfMonth ? Number(data.dayOfMonth) : undefined,
+					weekdays: data.weekdays ? Number(data.weekdays) : undefined,
+					endDate: data.endDate ? new Date(data.endDate) : undefined,
+				},
 			});
 
 			if (!result.success) {
@@ -94,7 +118,7 @@ export function CreateTaskSheet() {
 				return;
 			}
 
-			toast.success(`Task "${result.data.title}" created!`);
+			toast.success(`Task "${result.data.taskDefinition.title}" created!`);
 			reset();
 		} catch (criticalError) {
 			console.error("IPC Communication Crash:", criticalError);
@@ -182,7 +206,8 @@ export function CreateTaskSheet() {
 			<RecurrenceDialog
 				openDialog={showRecurrenceDialog}
 				onOpenDialog={setShowRecurrenceDialog}
-				onSelectRecurrence={(data) => setRecurrence(data)}
+				defaultOptions={recurrence}
+				onSetRecurrence={(data) => setRecurrence(data)}
 			/>
 			<PickEndDateDialog
 				openDialog={showPickEndDateDialog}
