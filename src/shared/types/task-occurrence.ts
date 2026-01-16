@@ -1,4 +1,4 @@
-export type ITaskStatus = "PENDING" | "COMPLETED" | "CANCELED" | "SKIPPED";
+export type ITaskStatus = 'PENDING' | 'COMPLETED' | 'CANCELED' | 'SKIPPED';
 
 export interface ITaskOccurrence {
 	id: string;

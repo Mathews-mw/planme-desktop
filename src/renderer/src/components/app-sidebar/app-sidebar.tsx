@@ -1,4 +1,4 @@
-import { IconInnerShadowTop } from "@tabler/icons-react";
+import { IconInnerShadowTop } from '@tabler/icons-react';
 import {
 	Sidebar,
 	SidebarContent,
@@ -8,9 +8,9 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarSeparator,
-} from "../ui/sidebar";
-import { NavMain } from "./nav-main";
-import { NavUser } from "./nav-user";
+} from '../ui/sidebar';
+import { NavMain } from './nav-main';
+import { NavUser } from './nav-user';
 
 export function AppSidebar() {
 	return (
@@ -35,7 +35,13 @@ export function AppSidebar() {
 			</SidebarContent>
 
 			<SidebarFooter>
-				<NavUser user={{ name: "Mathews Araujo", email: "mathews.araujo@example.com", avatar: "/avatar.png" }} />
+				<NavUser
+					user={{
+						name: 'Mathews Araujo',
+						email: 'mathews.araujo@example.com',
+						avatar: '/avatar.png',
+					}}
+				/>
 			</SidebarFooter>
 		</Sidebar>
 	);

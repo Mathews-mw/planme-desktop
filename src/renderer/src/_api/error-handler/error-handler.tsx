@@ -1,6 +1,5 @@
-import { toast } from "sonner";
-import { ApiExceptionsError } from "./api-exceptions-error";
-import { IpcError } from "~/src/shared/types/ipc";
+import { toast } from 'sonner';
+import { IpcError } from '~/src/shared/types/ipc';
 
 interface IParams {
 	error: unknown;
@@ -9,7 +8,7 @@ interface IParams {
 }
 
 export function errorHandler(error: IpcError) {
-	if (error.code === "VALIDATION_ERROR" && error.fieldErrors) {
+	if (error.code === 'VALIDATION_ERROR' && error.fieldErrors) {
 		const fieldErros = Object.entries(error.fieldErrors);
 
 		return toast.error(

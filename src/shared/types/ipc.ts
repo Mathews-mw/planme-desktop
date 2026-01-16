@@ -1,16 +1,16 @@
-import { ITask } from "./task";
-import { ITaskPriority } from "./task-definition";
-import { IRecurrenceEndType, IRecurrenceFrequency } from "./recurrence-rule";
+import { ITask } from './task';
+import { ITaskPriority } from './task-definition';
+import { IRecurrenceEndType, IRecurrenceFrequency } from './recurrence-rule';
 
 // ===IPC Errors ===
 
 export type IpcErrorCode =
-	| "VALIDATION_ERROR"
-	| "NOT_FOUND"
-	| "CONFLICT"
-	| "UNAUTHORIZED"
-	| "FORBIDDEN"
-	| "INTERNAL_ERROR";
+	| 'VALIDATION_ERROR'
+	| 'NOT_FOUND'
+	| 'CONFLICT'
+	| 'UNAUTHORIZED'
+	| 'FORBIDDEN'
+	| 'INTERNAL_ERROR';
 
 export type IpcFieldErrors = Record<string, string[] | undefined>;
 
@@ -27,6 +27,14 @@ export type IpcResponse<T> =
 
 // ===Request===
 
+export interface ICreateUserRequest {
+	id?: string;
+	providerAccountId?: string;
+	name: string;
+	email: string;
+	password: string;
+}
+
 export interface ICreateTaskRequest {
 	definition: {
 		title: string;
@@ -40,7 +48,7 @@ export interface ICreateTaskRequest {
 		startDateTime?: Date | null;
 		endDate?: Date | null;
 		interval?: number | null;
-		weekdays?: number | null;
+		weekdays?: Array<number> | null;
 		dayOfMonth?: number | null;
 		maxOccurrences?: number | null;
 	};
@@ -49,6 +57,10 @@ export interface ICreateTaskRequest {
 export type ISaveTaskRequest = ITask;
 
 // ===Response===
+
+export interface ICreateUserResponse {
+	id: string;
+}
 
 export interface ICreateTaskResponse {
 	data: ITask;

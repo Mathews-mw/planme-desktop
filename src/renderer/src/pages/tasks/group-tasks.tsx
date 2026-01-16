@@ -5,9 +5,9 @@ import {
 	IconPointFilled,
 	IconRefresh,
 	IconStar,
-} from "@tabler/icons-react";
-import { Checkbox } from "../../components/ui/checkbox";
-import { Button } from "../../components/ui/button";
+} from '@tabler/icons-react';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Button } from '../../components/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
+} from '../../components/ui/dropdown-menu';
 
 export function GroupTasks() {
 	return (

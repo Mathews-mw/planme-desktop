@@ -1,10 +1,10 @@
-import * as React from "react";
-import { CalendarIcon } from "lucide-react";
+import * as React from 'react';
+import { CalendarIcon } from 'lucide-react';
 
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { Calendar } from './ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 interface IProps {
 	disabled?: boolean;
@@ -14,13 +14,13 @@ interface IProps {
 
 function formatDate(date: Date | undefined) {
 	if (!date) {
-		return "";
+		return '';
 	}
 
-	return date.toLocaleDateString("en-US", {
-		day: "2-digit",
-		month: "long",
-		year: "numeric",
+	return date.toLocaleDateString('en-US', {
+		day: '2-digit',
+		month: 'long',
+		year: 'numeric',
 	});
 }
 
@@ -53,7 +53,7 @@ export function DatePicker({ disabled, date = new Date(), onselectDate }: IProps
 						}
 					}}
 					onKeyDown={(e) => {
-						if (e.key === "ArrowDown") {
+						if (e.key === 'ArrowDown') {
 							e.preventDefault();
 
 							setOpenDatePicker(true);

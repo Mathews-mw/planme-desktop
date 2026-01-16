@@ -1,7 +1,7 @@
-import { ISubtask } from "./subtask";
-import { IRecurrenceRule } from "./recurrence-rule";
-import { ITaskDefinition } from "./task-definition";
-import { ITaskOccurrence } from "./task-occurrence";
+import { ISubtask } from './subtask';
+import { IRecurrenceRule } from './recurrence-rule';
+import { ITaskDefinition } from './task-definition';
+import { ITaskOccurrence } from './task-occurrence';
 
 export interface ITask {
 	id: string;

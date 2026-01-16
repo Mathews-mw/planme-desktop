@@ -1,5 +1,5 @@
-import { ChevronRight } from "lucide-react";
-import { useMatches, Link, useLocation } from "react-router";
+import { ChevronRight } from 'lucide-react';
+import { useMatches, Link, useLocation } from 'react-router';
 
 type CrumbHandle = { crumb: string };
 
@@ -9,7 +9,7 @@ export function BreadcrumbsNavigation() {
 
 	const crumbs = matches
 		.filter(
-			(m): m is typeof m & { handle: CrumbHandle } => !!m.handle && typeof (m.handle as CrumbHandle).crumb === "string"
+			(m): m is typeof m & { handle: CrumbHandle } => !!m.handle && typeof (m.handle as CrumbHandle).crumb === 'string'
 		)
 		.map((m) => ({
 			crumb: (m.handle as CrumbHandle).crumb,

@@ -1,18 +1,18 @@
-import z from "zod";
+import z from 'zod';
 
 export const recurrenceFrequencySchema = z.union([
-	z.literal("NONE"),
-	z.literal("DAILY_INTERVAL"),
-	z.literal("WEEKLY_DAYS"),
-	z.literal("MONTHLY_DAY_OF_MONTH"),
-	z.literal("YEARLY_INTERVAL"),
+	z.literal('NONE'),
+	z.literal('DAILY_INTERVAL'),
+	z.literal('WEEKLY_DAYS'),
+	z.literal('MONTHLY_DAY_OF_MONTH'),
+	z.literal('YEARLY_INTERVAL'),
 ]);
 
 export const recurrenceEndTypeSchema = z.union([
-	z.literal("ONCE"),
-	z.literal("NEVER"),
-	z.literal("ON_DATE"),
-	z.literal("AFTER_OCCURRENCES"),
+	z.literal('ONCE'),
+	z.literal('NEVER'),
+	z.literal('ON_DATE'),
+	z.literal('AFTER_OCCURRENCES'),
 ]);
 
 export type IRecurrenceFrequency = z.infer<typeof recurrenceFrequencySchema>;

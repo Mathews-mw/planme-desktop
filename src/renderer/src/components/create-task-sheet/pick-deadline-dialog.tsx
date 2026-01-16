@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { Button } from "../ui/button";
-import { Calendar } from "../ui/calendar";
+import { Button } from '../ui/button';
+import { Calendar } from '../ui/calendar';
 import {
 	Dialog,
 	DialogClose,
@@ -10,7 +10,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
+} from '../ui/dialog';
 
 interface IProps {
 	openDialog: boolean;
@@ -18,7 +18,7 @@ interface IProps {
 	onPickDate: (date: Date) => void;
 }
 
-export function PickEndDateDialog({ openDialog, onOpenDialog, onPickDate }: IProps) {
+export function PickDeadlineDialog({ openDialog, onOpenDialog, onPickDate }: IProps) {
 	const [date, setDate] = useState<Date | undefined>(new Date());
 
 	function handlePickDateTime() {
@@ -39,8 +39,8 @@ export function PickEndDateDialog({ openDialog, onOpenDialog, onPickDate }: IPro
 		<Dialog open={openDialog} onOpenChange={onOpenDialog}>
 			<DialogContent className="sm:max-w-81.25">
 				<DialogHeader>
-					<DialogTitle>Pick a date</DialogTitle>
-					<DialogDescription>Select a date and time to create a reminder.</DialogDescription>
+					<DialogTitle>Deadline</DialogTitle>
+					<DialogDescription>Select a date to be the deadline for your task.</DialogDescription>
 				</DialogHeader>
 
 				<div className="flex flex-col items-center justify-center gap-2">

@@ -1,30 +1,45 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from 'react-router';
 
-import { TasksPage } from "./pages/tasks/page";
-import { AgendaPage } from "./pages/agenda/page";
-import { AppLayout } from "./pages/layouts/app-layout";
-import { FavoriteTasksPage } from "./pages/favorite-tasks/page";
+import { TasksPage } from './pages/tasks/page';
+import { AgendaPage } from './pages/agenda/page';
+import { AppLayout } from './pages/layouts/app-layout';
+import { FavoriteTasksPage } from './pages/favorite-tasks/page';
+import { WelcomePage } from './pages/welcome/page';
+import { SignUpPage } from './pages/sign-up/page';
 
 export const router = createBrowserRouter([
 	{
-		path: "/",
+		path: '/',
+		element: <WelcomePage />,
+	},
+	{
+		path: '/signup',
+		element: <SignUpPage />,
+	},
+	{
+		path: '/',
 		element: <AppLayout />,
 		children: [
 			{
-				index: true,
+				path: 'tasks',
 				element: <TasksPage />,
-				handle: { crumb: "Tasks" },
+				handle: { crumb: 'Tasks' },
 			},
 			{
-				path: "favorites",
+				path: 'favorites',
 				element: <FavoriteTasksPage />,
-				handle: { crumb: "Favorite Tasks" },
+				handle: { crumb: 'Favorite Tasks' },
 			},
 			{
-				path: "agenda",
+				path: 'agenda',
 				element: <AgendaPage />,
-				handle: { crumb: "Agenda" },
+				handle: { crumb: 'Agenda' },
 			},
 		],
 	},
+	// {
+	// 	path: '/',
+	// 	element: <AuthLayout />,
+	// 	children: [{ path: '/login', element: <LoginPage />, handle: { crumb: 'Login' } }],
+	// },
 ]);

@@ -1,8 +1,8 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
-import { type IDateTime } from "./create-task-sheet";
+import { type IDateTime } from './create-task-sheet';
 
-import { Button } from "../ui/button";
+import { Button } from '../ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,10 +10,10 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from '../ui/dropdown-menu';
 
-import { X } from "lucide-react";
-import { IconAlarm, IconCalendarClock } from "@tabler/icons-react";
+import { X } from 'lucide-react';
+import { IconAlarm, IconCalendarClock } from '@tabler/icons-react';
 
 interface IProps {
 	dateTime: IDateTime | undefined;
@@ -24,8 +24,8 @@ interface IProps {
 export function ReminderDropdown({ dateTime, onRemoveDateTime, onShowReminderDialog }: IProps) {
 	const reminderDt = dateTime ? buildReminderDateTime(dateTime) : null;
 
-	const timeLabel = reminderDt ? dayjs(reminderDt).format("h:mm A") : "";
-	const dateLabel = reminderDt ? dayjs(reminderDt).format("MMMM D, YYYY") : "";
+	const timeLabel = reminderDt ? dayjs(reminderDt).format('h:mm A') : '';
+	const dateLabel = reminderDt ? dayjs(reminderDt).format('MMMM D, YYYY') : '';
 
 	return (
 		<DropdownMenu>
@@ -92,6 +92,6 @@ function buildReminderDateTime(dateTime: NonNullable<IDateTime>) {
 		Number(dateTime.hour),
 		Number(dateTime.minute),
 		0,
-		0,
+		0
 	);
 }

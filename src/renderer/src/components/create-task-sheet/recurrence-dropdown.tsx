@@ -1,19 +1,19 @@
-import dayjs from "dayjs";
-import { Fragment, useMemo } from "react";
+import dayjs from 'dayjs';
+import { Fragment, useMemo } from 'react';
 
-import { type IRecurrenceData } from "./create-task-sheet";
+import { type IRecurrenceData } from './create-task-sheet';
 
-import { Button } from "../ui/button";
+import { Button } from '../ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from '../ui/dropdown-menu';
 
-import { X } from "lucide-react";
-import { IconCalendarRepeat, IconReload } from "@tabler/icons-react";
+import { X } from 'lucide-react';
+import { IconCalendarRepeat, IconReload } from '@tabler/icons-react';
 
 interface IProps {
 	recurrenceData: IRecurrenceData | undefined;
@@ -23,42 +23,56 @@ interface IProps {
 
 export function RecurrenceDropdown({ recurrenceData, onRemoveRecurrence, onShowRecurrenceDialog }: IProps) {
 	const recurrenceLabel = useMemo((): { repetition: string; ends?: string } => {
-		let result: { repetition: string; ends?: string } = { repetition: "No recurrence" };
+		let result: { repetition: string; ends?: string } = {
+			repetition: 'No recurrence',
+		};
 
 		if (!recurrenceData) {
 			return result;
 		}
 
 		switch (recurrenceData.frequency) {
-			case "DAILY_INTERVAL":
-				result = { repetition: `Repeats every ${recurrenceData.interval ?? 1} day(s)` };
+			case 'DAILY_INTERVAL':
+				result = {
+					repetition: `Repeats every ${recurrenceData.interval ?? 1} day(s)`,
+				};
 				break;
-			case "MONTHLY_DAY_OF_MONTH":
-				result = { repetition: `Repeats each month on day ${recurrenceData.dayOfMonth}` };
+			case 'MONTHLY_DAY_OF_MONTH':
+				result = {
+					repetition: `Repeats each month on day ${recurrenceData.dayOfMonth}`,
+				};
 				break;
-			case "WEEKLY_DAYS":
+			case 'WEEKLY_DAYS':
 				result = { repetition: `Repeats every week on selected days:` };
 				break;
-			case "YEARLY_INTERVAL":
-				result = { repetition: `Repeats every ${recurrenceData.interval ?? 1} year(s)` };
+			case 'YEARLY_INTERVAL':
+				result = {
+					repetition: `Repeats every ${recurrenceData.interval ?? 1} year(s)`,
+				};
 				break;
-			case "NONE":
-				result = { repetition: "No recurrence" };
+			case 'NONE':
+				result = { repetition: 'No recurrence' };
 				break;
 			default:
-				result = { repetition: "No recurrence" };
+				result = { repetition: 'No recurrence' };
 				break;
 		}
 
 		switch (recurrenceData.recurrenceEndType) {
-			case "NEVER":
-				result = { ...result, ends: "Never ends" };
+			case 'NEVER':
+				result = { ...result, ends: 'Never ends' };
 				break;
-			case "AFTER_OCCURRENCES":
-				result = { ...result, ends: `Ends after ${recurrenceData.maxOccurrences ?? 1} occurrences` };
+			case 'AFTER_OCCURRENCES':
+				result = {
+					...result,
+					ends: `Ends after ${recurrenceData.maxOccurrences ?? 1} occurrences`,
+				};
 				break;
-			case "ON_DATE":
-				result = { ...result, ends: `Ends on ${dayjs(recurrenceData.endDate!).format("MMMM DD, YYYY")}` };
+			case 'ON_DATE':
+				result = {
+					...result,
+					ends: `Ends on ${dayjs(recurrenceData.endDate!).format('MMMM DD, YYYY')}`,
+				};
 				break;
 		}
 

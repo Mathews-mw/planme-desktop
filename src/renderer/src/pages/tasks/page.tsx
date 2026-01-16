@@ -7,8 +7,8 @@ import {
 	IconPointFilled,
 	IconRefresh,
 	IconSquareRoundedCheckFilled,
-} from "@tabler/icons-react";
-import { Checkbox } from "../../components/ui/checkbox";
+} from '@tabler/icons-react';
+import { Checkbox } from '../../components/ui/checkbox';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -16,10 +16,10 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
-import { RefreshCcw, StarIcon } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { GroupTasks } from "./group-tasks";
+} from '../../components/ui/dropdown-menu';
+import { RefreshCcw, StarIcon } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import { GroupTasks } from './group-tasks';
 
 export function TasksPage() {
 	return (

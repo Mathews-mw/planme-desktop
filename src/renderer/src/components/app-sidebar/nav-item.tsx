@@ -1,7 +1,7 @@
-import { type ComponentType, type SVGProps } from "react";
-import { Link, useLocation, type LinkProps } from "react-router";
+import { type ComponentType, type SVGProps } from 'react';
+import { Link, useLocation, type LinkProps } from 'react-router';
 
-import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
+import { SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar';
 
 interface INavItemProps extends LinkProps {
 	title: string;

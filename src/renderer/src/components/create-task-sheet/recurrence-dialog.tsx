@@ -1,17 +1,17 @@
-import z from "zod";
-import { useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import z from 'zod';
+import { useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 
-import { type IRecurrenceData } from "./create-task-sheet";
+import { type IRecurrenceData } from './create-task-sheet';
 
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
-import { DatePicker } from "../date-picker";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Separator } from '../ui/separator';
+import { DatePicker } from '../date-picker';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import {
 	Dialog,
 	DialogClose,
@@ -20,7 +20,7 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
+} from '../ui/dialog';
 
 interface IProps {
 	openDialog: boolean;
@@ -30,13 +30,13 @@ interface IProps {
 }
 
 const weekDays = [
-	{ value: 1, label: "Monday" },
-	{ value: 2, label: "Tuesday" },
-	{ value: 3, label: "Wednesday" },
-	{ value: 4, label: "Thursday" },
-	{ value: 5, label: "Friday" },
-	{ value: 6, label: "Saturday" },
-	{ value: 7, label: "Sunday" },
+	{ value: 1, label: 'Monday' },
+	{ value: 2, label: 'Tuesday' },
+	{ value: 3, label: 'Wednesday' },
+	{ value: 4, label: 'Thursday' },
+	{ value: 5, label: 'Friday' },
+	{ value: 6, label: 'Saturday' },
+	{ value: 7, label: 'Sunday' },
 ] as const;
 
 function toggleNumberInArray(arr: number[], value: number) {
@@ -50,70 +50,70 @@ function toWeekdayObjects(values: number[]) {
 const formSchema = z
 	.object({
 		frequency: z
-			.enum(["NONE", "DAILY_INTERVAL", "WEEKLY_DAYS", "MONTHLY_DAY_OF_MONTH", "YEARLY_INTERVAL"])
-			.default("NONE"),
-		interval: z.coerce.number().int().min(1, { message: "Interval must be >= 1" }).default(1),
+			.enum(['NONE', 'DAILY_INTERVAL', 'WEEKLY_DAYS', 'MONTHLY_DAY_OF_MONTH', 'YEARLY_INTERVAL'])
+			.default('NONE'),
+		interval: z.coerce.number().int().min(1, { message: 'Interval must be >= 1' }).default(1),
 		dayOfMonth: z.coerce.number().int().min(1).max(31).default(1),
 		weekdaysSelected: z.array(z.coerce.number().int()).default([]),
-		recurrenceEndType: z.enum(["NEVER", "ON_DATE", "AFTER_OCCURRENCES"]).default("NEVER"),
+		recurrenceEndType: z.enum(['NEVER', 'ON_DATE', 'AFTER_OCCURRENCES']).default('NEVER'),
 		endDate: z.coerce.date().nullable().default(null),
-		maxOccurrences: z.coerce.number().int().min(1, { message: "Must be >= 1" }).nullable().default(null),
+		maxOccurrences: z.coerce.number().int().min(1, { message: 'Must be >= 1' }).nullable().default(null),
 	})
 	.superRefine((data, ctx) => {
 		// Se não repete, não precisa validar resto
-		if (data.frequency === "NONE") return;
+		if (data.frequency === 'NONE') return;
 
 		// interval obrigatório apenas para DAILY_INTERVAL e YEARLY_INTERVAL
 		if (
-			(data.frequency === "DAILY_INTERVAL" || data.frequency === "YEARLY_INTERVAL") &&
+			(data.frequency === 'DAILY_INTERVAL' || data.frequency === 'YEARLY_INTERVAL') &&
 			(!data.interval || data.interval < 1)
 		) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
-				path: ["interval"],
-				message: "Please, provide a valid interval.",
+				path: ['interval'],
+				message: 'Please, provide a valid interval.',
 			});
 		}
 
 		// dayOfMonth obrigatório apenas para MONTHLY_DAY_OF_MONTH
-		if (data.frequency === "MONTHLY_DAY_OF_MONTH") {
+		if (data.frequency === 'MONTHLY_DAY_OF_MONTH') {
 			if (!data.dayOfMonth || data.dayOfMonth < 1 || data.dayOfMonth > 31) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					path: ["dayOfMonth"],
-					message: "Please, select a valid day.",
+					path: ['dayOfMonth'],
+					message: 'Please, select a valid day.',
 				});
 			}
 		}
 
 		// weekdays obrigatório para WEEKLY_DAYS
-		if (data.frequency === "WEEKLY_DAYS") {
+		if (data.frequency === 'WEEKLY_DAYS') {
 			if (!data.weekdaysSelected || data.weekdaysSelected.length === 0) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					path: ["weekdaysSelected"],
-					message: "Select at least 1 weekday.",
+					path: ['weekdaysSelected'],
+					message: 'Select at least 1 weekday.',
 				});
 			}
 		}
 
 		// regras de término
-		if (data.recurrenceEndType === "ON_DATE") {
+		if (data.recurrenceEndType === 'ON_DATE') {
 			if (!data.endDate) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					path: ["endDate"],
-					message: "Please, select an end date.",
+					path: ['endDate'],
+					message: 'Please, select an end date.',
 				});
 			}
 		}
 
-		if (data.recurrenceEndType === "AFTER_OCCURRENCES") {
+		if (data.recurrenceEndType === 'AFTER_OCCURRENCES') {
 			if (!data.maxOccurrences || data.maxOccurrences < 1) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					path: ["maxOccurrences"],
-					message: "Please, provide how many occurrences.",
+					path: ['maxOccurrences'],
+					message: 'Please, provide how many occurrences.',
 				});
 			}
 		}
@@ -133,23 +133,29 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 	} = useForm<FormInputData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			frequency: "NONE",
+			frequency: 'NONE',
 			interval: 1,
 			dayOfMonth: 1,
 			weekdaysSelected: [],
-			recurrenceEndType: "NEVER",
+			recurrenceEndType: 'NEVER',
 			endDate: null,
 			maxOccurrences: null,
 		},
 	});
 
-	const watchedFrequencyValue = useWatch({ control, name: "frequency" });
-	const watchedRecurrenceEndValue = useWatch({ control, name: "recurrenceEndType" });
-	const weekdaysSelected = useWatch({ control, name: "weekdaysSelected" }) as number[];
+	const watchedFrequencyValue = useWatch({ control, name: 'frequency' });
+	const watchedRecurrenceEndValue = useWatch({
+		control,
+		name: 'recurrenceEndType',
+	});
+	const weekdaysSelected = useWatch({
+		control,
+		name: 'weekdaysSelected',
+	}) as number[];
 
 	function handleSelectWeekday(value: number) {
 		const next = toggleNumberInArray(weekdaysSelected ?? [], value);
-		setValue("weekdaysSelected", next, { shouldValidate: true });
+		setValue('weekdaysSelected', next, { shouldValidate: true });
 	}
 
 	function handleSetRecurrence(data: FormInputData) {
@@ -158,18 +164,18 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 		onSetRecurrence({
 			frequency: parsedData.frequency,
 			interval:
-				parsedData.frequency === "DAILY_INTERVAL" || parsedData.frequency === "YEARLY_INTERVAL"
+				parsedData.frequency === 'DAILY_INTERVAL' || parsedData.frequency === 'YEARLY_INTERVAL'
 					? parsedData.interval
 					: undefined,
-			dayOfMonth: parsedData.frequency === "MONTHLY_DAY_OF_MONTH" ? parsedData.dayOfMonth : undefined,
+			dayOfMonth: parsedData.frequency === 'MONTHLY_DAY_OF_MONTH' ? parsedData.dayOfMonth : undefined,
 			weekdays:
-				parsedData.frequency === "WEEKLY_DAYS" && parsedData.weekdaysSelected.length > 0
+				parsedData.frequency === 'WEEKLY_DAYS' && parsedData.weekdaysSelected.length > 0
 					? toWeekdayObjects(parsedData.weekdaysSelected)
 					: undefined,
 			recurrenceEndType: parsedData.recurrenceEndType,
-			endDate: parsedData.recurrenceEndType === "ON_DATE" ? (parsedData.endDate ?? undefined) : undefined,
+			endDate: parsedData.recurrenceEndType === 'ON_DATE' ? (parsedData.endDate ?? undefined) : undefined,
 			maxOccurrences:
-				parsedData.recurrenceEndType === "AFTER_OCCURRENCES" ? (parsedData.maxOccurrences ?? undefined) : undefined,
+				parsedData.recurrenceEndType === 'AFTER_OCCURRENCES' ? (parsedData.maxOccurrences ?? undefined) : undefined,
 		});
 
 		onOpenDialog(false);
@@ -180,21 +186,21 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 
 		if (defaultOptions) {
 			reset({
-				frequency: defaultOptions.frequency as FormInputData["frequency"],
+				frequency: defaultOptions.frequency as FormInputData['frequency'],
 				interval: defaultOptions.interval ?? 1,
 				dayOfMonth: defaultOptions.dayOfMonth ?? 1,
 				weekdaysSelected: defaultOptions.weekdays?.map((w) => w.value) ?? [],
-				recurrenceEndType: (defaultOptions.recurrenceEndType as FormInputData["recurrenceEndType"]) ?? "NEVER",
+				recurrenceEndType: (defaultOptions.recurrenceEndType as FormInputData['recurrenceEndType']) ?? 'NEVER',
 				endDate: defaultOptions.endDate ?? null,
 				maxOccurrences: defaultOptions.maxOccurrences ?? null,
 			});
 		} else {
 			reset({
-				frequency: "NONE",
+				frequency: 'NONE',
 				interval: 1,
 				dayOfMonth: 1,
 				weekdaysSelected: [],
-				recurrenceEndType: "NEVER",
+				recurrenceEndType: 'NEVER',
 				endDate: null,
 				maxOccurrences: null,
 			});
@@ -204,11 +210,11 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 	// UX: se mudar frequency para NONE, “desabilita” end type e limpa extras
 	useEffect(() => {
 		if (!openDialog) return;
-		if (watchedFrequencyValue === "NONE") {
-			setValue("recurrenceEndType", "NEVER");
-			setValue("endDate", null);
-			setValue("maxOccurrences", null);
-			setValue("weekdaysSelected", []);
+		if (watchedFrequencyValue === 'NONE') {
+			setValue('recurrenceEndType', 'NEVER');
+			setValue('endDate', null);
+			setValue('maxOccurrences', null);
+			setValue('weekdaysSelected', []);
 		}
 	}, [watchedFrequencyValue, openDialog, setValue]);
 
@@ -247,21 +253,21 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 						{errors.frequency?.message && <small className="text-sm text-red-500">{errors.frequency.message}</small>}
 					</div>
 
-					{watchedFrequencyValue === "DAILY_INTERVAL" && (
+					{watchedFrequencyValue === 'DAILY_INTERVAL' && (
 						<div className="flex items-center gap-2">
 							<Label>Repeat every</Label>
 							<Input
 								type="number"
 								inputMode="numeric"
 								className="no-spinner w-14"
-								{...register("interval", { valueAsNumber: true })}
+								{...register('interval', { valueAsNumber: true })}
 							/>
 							<Label>day(s)</Label>
 							{errors.interval?.message && <small className="text-sm text-red-500">{errors.interval.message}</small>}
 						</div>
 					)}
 
-					{watchedFrequencyValue === "WEEKLY_DAYS" && (
+					{watchedFrequencyValue === 'WEEKLY_DAYS' && (
 						<div className="space-y-2">
 							<div className="flex justify-between gap-2">
 								{weekDays.map((weekday) => (
@@ -281,7 +287,7 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 						</div>
 					)}
 
-					{watchedFrequencyValue === "MONTHLY_DAY_OF_MONTH" && (
+					{watchedFrequencyValue === 'MONTHLY_DAY_OF_MONTH' && (
 						<div className="flex items-center gap-2">
 							<Label>Repeat monthly on day</Label>
 
@@ -312,14 +318,14 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 						</div>
 					)}
 
-					{watchedFrequencyValue === "YEARLY_INTERVAL" && (
+					{watchedFrequencyValue === 'YEARLY_INTERVAL' && (
 						<div className="flex items-center gap-2">
 							<Label>Repeat every</Label>
 							<Input
 								type="number"
 								inputMode="numeric"
 								className="no-spinner w-14"
-								{...register("interval", { valueAsNumber: true })}
+								{...register('interval', { valueAsNumber: true })}
 							/>
 							<Label>year(s)</Label>
 							{errors.interval?.message && <small className="text-sm text-red-500">{errors.interval.message}</small>}
@@ -338,7 +344,7 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 								<RadioGroup
 									value={field.value}
 									onValueChange={field.onChange}
-									disabled={watchedFrequencyValue === "NONE"}
+									disabled={watchedFrequencyValue === 'NONE'}
 								>
 									<div className="flex items-center space-x-2">
 										<RadioGroupItem value="NEVER" id="NEVER" />
@@ -355,7 +361,7 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 												name="endDate"
 												render={({ field: dateField }) => (
 													<DatePicker
-														disabled={watchedRecurrenceEndValue !== "ON_DATE"}
+														disabled={watchedRecurrenceEndValue !== 'ON_DATE'}
 														date={dateField.value ? (dateField.value as Date) : undefined}
 														onselectDate={(d) => dateField.onChange(d ?? null)}
 													/>
@@ -373,9 +379,9 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 											<Input
 												type="number"
 												inputMode="numeric"
-												disabled={watchedRecurrenceEndValue !== "AFTER_OCCURRENCES"}
+												disabled={watchedRecurrenceEndValue !== 'AFTER_OCCURRENCES'}
 												className="no-spinner h-8 w-16"
-												{...register("maxOccurrences", { valueAsNumber: true })}
+												{...register('maxOccurrences', { valueAsNumber: true })}
 											/>
 											times
 										</Label>

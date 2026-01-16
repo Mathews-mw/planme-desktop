@@ -1,9 +1,19 @@
-import { Outlet } from "react-router";
-import { SidebarInset, SidebarProvider } from "../../components/ui/sidebar";
-import { AppSidebar } from "../../components/app-sidebar/app-sidebar";
-import { Header } from "../../components/header";
+import { Navigate, Outlet } from 'react-router';
+
+import { Header } from '../../components/header';
+import { useAuth } from '../../context/auth-context';
+import { AppSidebar } from '../../components/app-sidebar/app-sidebar';
+import { SidebarInset, SidebarProvider } from '../../components/ui/sidebar';
 
 export function AppLayout() {
+	const { user, isLoading } = useAuth();
+
+	if (isLoading) {
+		return <div className="p-6">Loading...</div>;
+	}
+
+	if (!user) return <Navigate to="/" replace />;
+
 	return (
 		<SidebarProvider defaultOpen>
 			<AppSidebar />

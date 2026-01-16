@@ -1,7 +1,7 @@
-import { Search } from "lucide-react";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
+import { Search } from 'lucide-react';
+import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group';
 
-export function SearchForm({ ...props }: React.ComponentProps<"form">) {
+export function SearchForm({ ...props }: React.ComponentProps<'form'>) {
 	return (
 		<form {...props}>
 			<InputGroup>

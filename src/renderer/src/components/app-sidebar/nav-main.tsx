@@ -1,9 +1,9 @@
-import type { ComponentType, SVGProps } from "react";
+import type { ComponentType, SVGProps } from 'react';
 
-import { NavItem } from "./nav-item";
-import { SidebarGroup, SidebarGroupContent, SidebarMenu } from "../ui/sidebar";
+import { NavItem } from './nav-item';
+import { SidebarGroup, SidebarGroupContent, SidebarMenu } from '../ui/sidebar';
 
-import { IconNotebook, IconSquareRoundedCheck, IconStar } from "@tabler/icons-react";
+import { IconNotebook, IconSquareRoundedCheck, IconStar } from '@tabler/icons-react';
 
 interface IItemProps {
 	title: string;
@@ -18,18 +18,18 @@ interface IItemProps {
 export function NavMain() {
 	const items: Array<IItemProps> = [
 		{
-			title: "Favorites",
-			url: "/favorites",
+			title: 'Favorites',
+			url: '/favorites',
 			icon: IconStar,
 		},
 		{
-			title: "Tasks",
-			url: "/",
+			title: 'Tasks',
+			url: '/',
 			icon: IconSquareRoundedCheck,
 		},
 		{
-			title: "Agenda",
-			url: "/agenda",
+			title: 'Agenda',
+			url: '/agenda',
 			icon: IconNotebook,
 		},
 	];

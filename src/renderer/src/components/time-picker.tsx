@@ -1,13 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { ButtonGroup } from "./ui/button-group";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "./ui/select";
+import { ButtonGroup } from './ui/button-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface IProps {
 	onPickTime: (time: { hour: string; minute: string }) => void;
@@ -19,12 +13,8 @@ const hours = Array.from({ length: 23 }, (_, i) => i + 1);
 const minutes = Array.from({ length: 60 }, (_, i) => i);
 
 export function TimePicker({ defaultHour, defaultMinute, onPickTime }: IProps) {
-	const [hour, setHour] = useState(
-		defaultHour ?? new Date().getHours().toString()
-	);
-	const [minute, setMinute] = useState(
-		defaultMinute ?? new Date().getMinutes().toString()
-	);
+	const [hour, setHour] = useState(defaultHour ?? new Date().getHours().toString());
+	const [minute, setMinute] = useState(defaultMinute ?? new Date().getMinutes().toString());
 
 	function handleSelectHour(value: string) {
 		setHour(value);
@@ -62,11 +52,8 @@ export function TimePicker({ defaultHour, defaultMinute, onPickTime }: IProps) {
 				<SelectContent>
 					{minutes.map((minute) => {
 						return (
-							<SelectItem
-								key={minute}
-								value={minute.toString().padStart(2, "0")}
-							>
-								{minute.toString().padStart(2, "0")}
+							<SelectItem key={minute} value={minute.toString().padStart(2, '0')}>
+								{minute.toString().padStart(2, '0')}
 							</SelectItem>
 						);
 					})}

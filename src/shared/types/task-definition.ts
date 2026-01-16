@@ -1,10 +1,10 @@
-import z from "zod";
+import z from 'zod';
 
 export const taskPrioritySchema = z.union([
-	z.literal("LOW"),
-	z.literal("NORMAL"),
-	z.literal("HIGH"),
-	z.literal("NONE"),
+	z.literal('LOW'),
+	z.literal('NORMAL'),
+	z.literal('HIGH'),
+	z.literal('NONE'),
 ]);
 
 export type ITaskPriority = z.infer<typeof taskPrioritySchema>;

@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -7,11 +7,11 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "../ui/sidebar";
+} from '../ui/dropdown-menu';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '../ui/sidebar';
 
-import { IconCreditCard, IconDotsVertical, IconLogout, IconNotification, IconUserCircle } from "@tabler/icons-react";
-import { ThemeSwitcher } from "./theme-switcher";
+import { IconCreditCard, IconDotsVertical, IconLogout, IconNotification, IconUserCircle } from '@tabler/icons-react';
+import { ThemeSwitcher } from './theme-switcher';
 
 export function NavUser({
 	user,
@@ -46,7 +46,7 @@ export function NavUser({
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
 						className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-						side={isMobile ? "bottom" : "right"}
+						side={isMobile ? 'bottom' : 'right'}
 						align="end"
 						sideOffset={4}
 					>
