@@ -15,6 +15,11 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
 
+export async function initAuth() {
+	// Persistência LOCAL: mantém logado ao reiniciar o app
+	await setPersistence(auth, browserLocalPersistence);
+}
+
 // Uma Promise que resolve quando o Firebase terminar de restaurar a sessão.
 export const authReady = new Promise<User | null>((resolve) => {
 	const unsub = onAuthStateChanged(auth, (user) => {
@@ -22,8 +27,3 @@ export const authReady = new Promise<User | null>((resolve) => {
 		resolve(user);
 	});
 });
-
-export async function initAuth() {
-	// Persistência LOCAL: mantém logado ao reiniciar o app
-	await setPersistence(auth, browserLocalPersistence);
-}

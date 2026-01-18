@@ -1,6 +1,12 @@
 export const IPC = {
+	AUTH: {
+		GET_LAST_ACTIVE_USER: 'auth:get_last_active_user',
+		SET_LAST_ACTIVE_USER: 'auth:set_last_active_user',
+		CLEAR_LAST_ACTIVE_USER: 'auth:clear_last_active_user',
+	},
 	USERS: {
 		CREATE: 'users:create',
+		GET: 'users:get',
 	},
 	TASKS: {
 		FETCH_ALL: 'tasks:fetch_all',

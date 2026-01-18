@@ -6,6 +6,14 @@ declare global {
 	interface Window {
 		electron: ElectronAPI;
 		api: {
+			getLastActiveUser(): Promise<
+				import('../shared/types/ipc').IpcResponse<import('../shared/types/user').IUser | null>
+			>;
+			setLastActiveUser(data: { uid: string }): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			clearLastActiveUser(): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			getUser(
+				data: import('../shared/types/ipc').IGetUserRequest
+			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/user').IUser>>;
 			createUser(
 				data: import('../shared/types/ipc').ICreateUserRequest
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/ipc').ICreateUserResponse>>;

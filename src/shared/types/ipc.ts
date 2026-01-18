@@ -27,6 +27,10 @@ export type IpcResponse<T> =
 
 // ===Request===
 
+export interface IGetUserRequest {
+	id: string;
+}
+
 export interface ICreateUserRequest {
 	id?: string;
 	providerAccountId?: string;

@@ -1,20 +1,19 @@
 import z from 'zod';
 import { toast } from 'sonner';
-import { ComponentProps } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
-import { useMutation } from '@tanstack/react-query';
+import { ComponentProps, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useLocation, useNavigate } from 'react-router';
 
 import { cn } from '../../lib/utils';
+import { useAuth } from '../../context/auth-context';
 import { isFirebaseError } from '../../lib/firebase/firebase-error';
-import { signInWithCredentials } from '../../services/auth-service';
 
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { PasswordInput } from '../../components/ui/password-input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '../../components/ui/field';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 
 import { Loader2 } from 'lucide-react';
 
@@ -30,31 +29,35 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export function CredentialsSignInTab({ className, onTabChange, ...props }: IProps) {
-	const { register, handleSubmit, reset } = useForm<FormData>({
+	const { register, handleSubmit } = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 	});
 
+	const { signIn } = useAuth();
 	const router = useNavigate();
+	const location = useLocation();
 
-	const { mutateAsync: signInFn, isPending } = useMutation({
-		mutationFn: signInWithCredentials,
-	});
+	const [isLoading, startTransition] = useTransition();
 
-	async function handleSignIn(data: FormData) {
-		try {
-			await signInFn({ email: data.email, password: data.password });
+	const from = location.state?.from?.pathname ?? '/tasks';
 
-			router('/tasks', { replace: true });
-		} catch (error) {
-			console.log('sign in error: ', error);
+	const handleSignIn = (data: FormData) => {
+		startTransition(async () => {
+			try {
+				await signIn({ email: data.email, password: data.password });
 
-			if (isFirebaseError(error)) {
-				toast.error('Authentication error', { description: mapAuthError(error.code) });
-			} else {
-				toast.error('Unexpected error.');
+				router(from, { replace: true });
+			} catch (error) {
+				console.log('sign in error: ', error);
+
+				if (isFirebaseError(error)) {
+					toast.error('Authentication error', { description: mapAuthError(error.code) });
+				} else {
+					toast.error('Unexpected error.');
+				}
 			}
-		}
-	}
+		});
+	};
 
 	return (
 		<div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -84,11 +87,11 @@ export function CredentialsSignInTab({ className, onTabChange, ...props }: IProp
 
 							<Field>
 								<Button type="submit">
-									{isPending && <Loader2 className="animate-spin" />}
+									{isLoading && <Loader2 className="animate-spin" />}
 									Login
 								</Button>
 
-								<Button variant="outline" type="button" disabled={isPending} onClick={onTabChange}>
+								<Button variant="outline" type="button" disabled={isLoading} onClick={onTabChange}>
 									Back
 								</Button>
 

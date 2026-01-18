@@ -1,12 +1,13 @@
+import { onAuthStateChanged } from 'firebase/auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { auth } from '../lib/firebase/firebase';
 import { type IUser } from '~/src/shared/types/user';
 import { getUser } from '../_api/ipc-requests/get-user';
+import { auth, authReady, initAuth } from '../lib/firebase/firebase';
 import { FirebaseAuthService } from '../services/firebase-auth-service';
 
-type AuthStatus = 'authenticated' | 'unauthenticated' | 'authenticated_offline';
+type AuthStatus = 'booting' | 'authenticated' | 'unauthenticated';
 
 type AuthContext = {
 	status: AuthStatus;
@@ -14,10 +15,8 @@ type AuthContext = {
 	// === actions ===
 	signIn({ email, password }: { email: string; password: string }): Promise<void>;
 	signOut(): Promise<void>;
+	// === utils ===
 	getIdToken(forceRefresh?: boolean): Promise<string | null>;
-	// === Boot commits ===
-	_commitAuthenticated(user: IUser, meta?: { offline?: boolean }): void;
-	_commitUnauthenticated(): void;
 };
 
 const AUTH_USER_KEY = ['auth', 'user'] as const;
@@ -28,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const queryClient = useQueryClient();
 
 	const [user, setUser] = useState<IUser | null>(null);
-	const [status, setStatus] = useState<AuthStatus>('unauthenticated');
+	const [status, setStatus] = useState<AuthStatus>('booting');
 
 	console.log('user context: ', user);
 
@@ -54,11 +53,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		},
 	});
 
+	// Bootstrap e sincronização: Firebase -> React Query/Context
+	useEffect(() => {
+		const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+			try {
+				await initAuth();
+				await authReady;
+
+				if (!firebaseUser) {
+					setUser(null);
+					setStatus('unauthenticated');
+					return;
+				}
+
+				setStatus('booting'); // Ou poderia ser "loadingUser" talvez...
+				const appUser = await getUser(firebaseUser.uid);
+
+				setUser(appUser);
+				queryClient.setQueryData(AUTH_USER_KEY, appUser);
+				setStatus('authenticated');
+			} catch (e) {
+				// fallback: se firebase tá logado mas não existe user local
+				console.log('AuthProvider - error fetching app user: ', e);
+				setUser(null);
+				setStatus('unauthenticated');
+			}
+		});
+
+		return () => unsub();
+	}, [queryClient]);
+
 	const value = useMemo<AuthContext>(
 		() => ({
 			status,
 			user,
-			async signIn({ email, password }) {
+			async signIn({ email, password }: { email: string; password: string }) {
 				await signInMutation.mutateAsync({ email, password });
 			},
 			async signOut() {
@@ -69,18 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				if (!current) return null;
 				return current.getIdToken(forceRefresh);
 			},
-			_commitAuthenticated(appUser: IUser, meta?: { offline?: boolean }) {
-				queryClient.setQueryData(AUTH_USER_KEY, appUser);
-				setUser(appUser);
-				setStatus(meta?.offline ? 'authenticated_offline' : 'authenticated');
-			},
-			_commitUnauthenticated() {
-				queryClient.setQueryData(AUTH_USER_KEY, null);
-				setUser(null);
-				setStatus('unauthenticated');
-			},
 		}),
-		[status, user, signInMutation, signOutMutation, queryClient]
+		[status, user, signInMutation, signOutMutation]
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

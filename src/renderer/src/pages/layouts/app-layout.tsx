@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router';
+import { Navigate, Outlet, useLocation } from 'react-router';
 
 import { Header } from '../../components/header';
 import { useAuth } from '../../context/auth-context';
@@ -6,13 +6,12 @@ import { AppSidebar } from '../../components/app-sidebar/app-sidebar';
 import { SidebarInset, SidebarProvider } from '../../components/ui/sidebar';
 
 export function AppLayout() {
-	const { user, isLoading } = useAuth();
+	const { status } = useAuth();
+	const location = useLocation();
 
-	if (isLoading) {
-		return <div className="p-6">Loading...</div>;
+	if (status === 'unauthenticated') {
+		return <Navigate to="/" replace state={{ from: location }} />;
 	}
-
-	if (!user) return <Navigate to="/" replace />;
 
 	return (
 		<SidebarProvider defaultOpen>

@@ -6,8 +6,8 @@ import { useMutation } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { cn } from '../../lib/utils';
-import { registerWithCredentials } from '../../services/auth-service';
 import { errorHandler } from '../../_api/error-handler/error-handler';
+import { FirebaseAuthService } from '../../services/firebase-auth-service';
 import { usersRepository } from '~/src/renderer/repositories/users-repository';
 
 import { Input } from '../../components/ui/input';
@@ -47,7 +47,10 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
 
 	const { mutateAsync: createUserFn, isPending } = useMutation({
 		mutationFn: async (data: FormData) => {
-			const firebaseResult = await registerWithCredentials({ email: data.email, password: data.password });
+			const firebaseResult = await FirebaseAuthService.registerWithCredentials({
+				email: data.email,
+				password: data.password,
+			});
 
 			const result = await usersRepository.create({
 				id: firebaseResult.uid,
