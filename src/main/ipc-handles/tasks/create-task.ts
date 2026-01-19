@@ -12,6 +12,8 @@ import { recurrenceEndTypeSchema, recurrenceFrequencySchema } from '~/src/shared
 
 const createTaskSchema = z.object({
 	definition: z.object({
+		userId: z.string().nullable().optional(),
+		listId: z.string(),
 		title: z.string().min(1, { message: 'Title is required' }),
 		description: z.string().nullable().optional(),
 		priority: taskPrioritySchema,
@@ -47,7 +49,7 @@ ipcMain.handle(IPC.TASKS.CREATE, async (_event, raw: ICreateTaskRequest): Promis
 
 	const data = parse.data;
 
-	const userId = 'customUserId';
+	const userId = data.definition.userId ?? randomUUID();
 	const taskId = randomUUID();
 	const taskDefinitionId = randomUUID();
 	const recurrenceRuleId = randomUUID();
@@ -59,6 +61,7 @@ ipcMain.handle(IPC.TASKS.CREATE, async (_event, raw: ICreateTaskRequest): Promis
 			taskDefinition: {
 				id: taskDefinitionId,
 				userId,
+				listId: data.definition.listId,
 				title: data.definition.title,
 				description: data.definition.description,
 				deadline: data.definition.deadline ? data.definition.deadline.toISOString() : null,

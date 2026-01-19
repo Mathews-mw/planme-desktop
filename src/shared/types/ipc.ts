@@ -39,8 +39,16 @@ export interface ICreateUserRequest {
 	password: string;
 }
 
+export interface ISaveTaskListRequest {
+	title?: string;
+	icon?: string;
+	position?: number;
+}
+
 export interface ICreateTaskRequest {
 	definition: {
+		userId?: string;
+		listId: string;
 		title: string;
 		description?: string | null;
 		priority?: ITaskPriority;

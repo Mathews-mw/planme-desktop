@@ -37,6 +37,7 @@ import {
 
 import { Loader2, Plus, X } from 'lucide-react';
 import { IconCalendarCheck } from '@tabler/icons-react';
+import { useAuth } from '../../context/auth-context';
 
 export interface IDateTime {
 	date: Date;
@@ -77,6 +78,8 @@ export function CreateTaskSheet() {
 		},
 	});
 
+	const { user } = useAuth();
+
 	const [openSheet, setOpenSheet] = useState(false);
 	const [showReminderDialog, setShowReminderDialog] = useState(false);
 	const [showRecurrenceDialog, setShowRecurrenceDialog] = useState(false);
@@ -97,6 +100,8 @@ export function CreateTaskSheet() {
 		try {
 			const result = await createTaskFn({
 				definition: {
+					userId: user?.id,
+					listId: '',
 					title: data.title,
 					description: data.description ?? null,
 					priority: data.priority ? (data.priority as ITaskPriority) : 'NONE',

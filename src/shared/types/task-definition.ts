@@ -12,6 +12,7 @@ export type ITaskPriority = z.infer<typeof taskPrioritySchema>;
 export interface ITaskDefinition {
 	id: string;
 	userId: string;
+	listId: string;
 	title: string;
 	description?: string | null;
 	deadline?: string | null;

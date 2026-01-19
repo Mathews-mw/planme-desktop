@@ -7,6 +7,7 @@ import { WelcomePage } from './pages/welcome/page';
 import { AppLayout } from './pages/layouts/app-layout';
 import { AuthLayout } from './pages/layouts/auth-layout';
 import { FavoriteTasksPage } from './pages/favorite-tasks/page';
+import { TaskListPage } from './pages/task-list/page';
 
 export const router = createBrowserRouter([
 	{
@@ -39,6 +40,11 @@ export const router = createBrowserRouter([
 				path: 'agenda',
 				element: <AgendaPage />,
 				handle: { crumb: 'Agenda' },
+			},
+			{
+				path: 'list/:slug',
+				element: <TaskListPage />,
+				handle: { crumb: 'Task List' },
 			},
 		],
 	},

@@ -8,6 +8,10 @@ export const IPC = {
 		CREATE: 'users:create',
 		GET: 'users:get',
 	},
+	TASK_LIST: {
+		CREATE: 'tasklist:create',
+		FETCH_ALL: 'tasklist:fetch_all',
+	},
 	TASKS: {
 		FETCH_ALL: 'tasks:fetch_all',
 		GET: 'tasks:get',

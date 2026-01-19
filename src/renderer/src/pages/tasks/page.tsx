@@ -1,25 +1,6 @@
-import {
-	IconCalendarTime,
-	IconDotsVertical,
-	IconNote,
-	IconNotes,
-	IconPoint,
-	IconPointFilled,
-	IconRefresh,
-	IconSquareRoundedCheckFilled,
-} from '@tabler/icons-react';
-import { Checkbox } from '../../components/ui/checkbox';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '../../components/ui/dropdown-menu';
-import { RefreshCcw, StarIcon } from 'lucide-react';
-import { Button } from '../../components/ui/button';
 import { GroupTasks } from './group-tasks';
+
+import { IconSquareRoundedCheckFilled } from '@tabler/icons-react';
 
 export function TasksPage() {
 	return (

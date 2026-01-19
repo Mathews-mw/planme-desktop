@@ -1,4 +1,6 @@
-import { IconInnerShadowTop } from '@tabler/icons-react';
+import { NavMain } from './nav-main';
+import { NavUser } from './nav-user';
+import { CreateList } from './create-list';
 import {
 	Sidebar,
 	SidebarContent,
@@ -9,8 +11,9 @@ import {
 	SidebarMenuItem,
 	SidebarSeparator,
 } from '../ui/sidebar';
-import { NavMain } from './nav-main';
-import { NavUser } from './nav-user';
+
+import { IconInnerShadowTop } from '@tabler/icons-react';
+import { NavTaskList } from './nav-task-list';
 
 export function AppSidebar() {
 	return (
@@ -30,15 +33,21 @@ export function AppSidebar() {
 
 			<SidebarContent>
 				<NavMain />
+
 				<SidebarSeparator className="mx-0" />
-				<NavMain />
+
+				<NavTaskList />
+
+				<CreateList />
 			</SidebarContent>
+
+			<SidebarSeparator className="mx-0" />
 
 			<SidebarFooter>
 				<NavUser
 					user={{
 						name: 'Mathews Araujo',
-						email: 'mathews.araujo@example.com',
+						email: 'mathews.mw@gmail.com',
 						avatar: '/avatar.png',
 					}}
 				/>

@@ -10,3 +10,10 @@ export interface ITask {
 	occurrences?: Array<ITaskOccurrence> | null;
 	subtasks?: Array<ISubtask> | null;
 }
+
+export interface ITaskList {
+	id: string;
+	title: string;
+	icon?: string;
+	position: number;
+}
