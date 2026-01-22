@@ -3,10 +3,10 @@ export type ITaskStatus = 'PENDING' | 'COMPLETED' | 'CANCELED' | 'SKIPPED';
 export interface ITaskOccurrence {
 	id: string;
 	taskDefinitionId: string;
-	occurrenceDateTime?: string | null;
+	occurrenceDateTime?: Date | null;
 	status: ITaskStatus;
 	note?: string | null;
-	completedAt?: string | null;
-	createdAt: string;
-	updatedAt?: string | null;
+	completedAt?: Date | null;
+	createdAt: Date;
+	updatedAt?: Date | null;
 }

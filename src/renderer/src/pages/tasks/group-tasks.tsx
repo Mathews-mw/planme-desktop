@@ -16,10 +16,11 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
+import { Container } from '../../components/container';
 
 export function GroupTasks() {
 	return (
-		<div className="flex flex-col gap-2 rounded-lg bg-primary/5 p-2 shadow-xs">
+		<Container>
 			<span className="font-semibold">Jan 10, 2026</span>
 			<ul className="flex w-full flex-1 flex-col space-y-2">
 				{Array.from({ length: 4 }).map((_, index) => {
@@ -77,6 +78,6 @@ export function GroupTasks() {
 					);
 				})}
 			</ul>
-		</div>
+		</Container>
 	);
 }

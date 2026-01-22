@@ -1,12 +1,13 @@
 // === Auth Imports ===
-import '../main/ipc-handles/auth/index';
+import './ipc/handles/auth/index';
 
 // === Users Imports ===
-import '../main/ipc-handles/users/get-user';
-import '../main/ipc-handles/users/create-user';
+import './ipc/handles/users/get-user';
+import './ipc/handles/users/create-user';
 
 // === Task List Imports ===
-import '../main/ipc-handles/task-list/index';
+import './ipc/handles/task-list/index';
 
 // === Tasks Imports ===
-import '../main/ipc-handles/tasks/create-task';
+import './ipc/handles/tasks/create-task-ipc';
+import './ipc/handles/tasks/listing-tasks';

@@ -35,12 +35,18 @@ const api = {
 	listingAllTaskLists(): Promise<{ data: ITaskList[] }> {
 		return ipcRenderer.invoke(IPC.TASK_LIST.FETCH_ALL);
 	},
+	getTaskListBySlug(data: { slug: string }): Promise<IpcResponse<ITaskList>> {
+		return ipcRenderer.invoke(IPC.TASK_LIST.GET_BY_SLUG, data);
+	},
 	createTaskList(data: ISaveTaskListRequest): Promise<IpcResponse<ITaskList>> {
 		return ipcRenderer.invoke(IPC.TASK_LIST.CREATE, data);
 	},
 
 	createTask(data: ICreateTaskRequest): Promise<IpcResponse<ITask>> {
 		return ipcRenderer.invoke(IPC.TASKS.CREATE, data);
+	},
+	listingTasks(): Promise<{ data: ITask[] }> {
+		return ipcRenderer.invoke(IPC.TASKS.FETCH_ALL);
 	},
 };
 

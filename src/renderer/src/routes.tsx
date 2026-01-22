@@ -1,13 +1,17 @@
 import { createBrowserRouter } from 'react-router';
 
+import { queryClient } from './lib/query-client';
+import { type ITaskList } from '~/src/shared/types/task';
+import { getTaskListBySlugQuery } from './_api/queries/get-task-list-by-slug-queries';
+
 import { TasksPage } from './pages/tasks/page';
 import { AgendaPage } from './pages/agenda/page';
 import { SignUpPage } from './pages/sign-up/page';
 import { WelcomePage } from './pages/welcome/page';
+import { TaskListPage } from './pages/task-list/page';
 import { AppLayout } from './pages/layouts/app-layout';
 import { AuthLayout } from './pages/layouts/auth-layout';
 import { FavoriteTasksPage } from './pages/favorite-tasks/page';
-import { TaskListPage } from './pages/task-list/page';
 
 export const router = createBrowserRouter([
 	{
@@ -39,12 +43,25 @@ export const router = createBrowserRouter([
 			{
 				path: 'agenda',
 				element: <AgendaPage />,
+
 				handle: { crumb: 'Agenda' },
 			},
 			{
 				path: 'list/:slug',
 				element: <TaskListPage />,
-				handle: { crumb: 'Task List' },
+				loader: async ({ params }) => {
+					const slug = params.slug!;
+
+					const data = await queryClient.ensureQueryData(getTaskListBySlugQuery(slug));
+
+					return { data };
+				},
+				handle: {
+					crumb: (data: ITaskList | undefined) => {
+						const crumbLabel = data ? data.title : 'Loading...';
+						return crumbLabel;
+					},
+				},
 			},
 		],
 	},

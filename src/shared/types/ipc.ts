@@ -21,9 +21,10 @@ export type IpcError = {
 	details?: unknown;
 };
 
-export type IpcResponse<T> =
-	| { success: true; data: T; error?: never }
-	| { success: false; error: IpcError; data?: never };
+export type IpcSuccess<T> = { success: true; data: T };
+export type IpcFail = { success: false; error: IpcError };
+
+export type IpcResponse<T> = IpcSuccess<T> | IpcFail;
 
 // ===Request===
 
@@ -48,7 +49,7 @@ export interface ISaveTaskListRequest {
 export interface ICreateTaskRequest {
 	definition: {
 		userId?: string;
-		listId: string;
+		listSlug: string;
 		title: string;
 		description?: string | null;
 		priority?: ITaskPriority;

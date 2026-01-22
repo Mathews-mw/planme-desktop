@@ -4,7 +4,6 @@ import { ITaskDefinition } from './task-definition';
 import { ITaskOccurrence } from './task-occurrence';
 
 export interface ITask {
-	id: string;
 	taskDefinition: ITaskDefinition;
 	recurrenceRule: IRecurrenceRule;
 	occurrences?: Array<ITaskOccurrence> | null;
@@ -13,7 +12,10 @@ export interface ITask {
 
 export interface ITaskList {
 	id: string;
+	slug: string;
 	title: string;
-	icon?: string;
+	icon?: string | null;
 	position: number;
+	createdAt: Date;
+	updatedAt?: Date | null;
 }

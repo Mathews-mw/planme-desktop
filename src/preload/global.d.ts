@@ -20,6 +20,11 @@ declare global {
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/ipc').ICreateUserResponse>>;
 
 			listingAllTaskLists(): Promise<{ data: import('../shared/types/task').ITaskList[] }>;
+			getTaskListBySlug({
+				slug,
+			}: {
+				slug: string;
+			}): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/task').ITaskList>>;
 			createTaskList(
 				data: import('../shared/types/ipc').ISaveTaskListRequest
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/task').ITaskList>>;
@@ -27,6 +32,7 @@ declare global {
 			createTask(
 				data: import('../shared/types/ipc').ICreateTaskRequest
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/task').ITask>>;
+			listingTasks(): Promise<{ data: import('../shared/types/task').ITask[] }>;
 		};
 	}
 }

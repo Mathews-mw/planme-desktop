@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `task_definitions_recurrence_rule_id_unique` ON `task_definitions` (`recurrence_rule_id`);

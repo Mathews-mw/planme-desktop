@@ -1,9 +1,11 @@
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
+import { getTaskListBySlugQuery } from '../../_api/queries/get-task-list-by-slug-queries';
 
 export function TaskListPage() {
 	const { slug } = useParams();
 
-	console.log('task list slug: ', slug);
+	const { data: taskList } = useQuery(getTaskListBySlugQuery(slug!));
 
 	return (
 		<div>

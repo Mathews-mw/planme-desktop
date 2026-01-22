@@ -3,7 +3,12 @@ import { cn } from '../lib/utils';
 
 export function Container({ children, className }: ComponentProps<'div'>) {
 	return (
-		<div className={cn('rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md', className)}>
+		<div
+			className={cn(
+				'shadow-msm rounded-lg border border-foreground/10 bg-foreground/5 p-4 backdrop-blur-sm',
+				className
+			)}
+		>
 			{children}
 		</div>
 	);

@@ -24,7 +24,7 @@ export function NavMain() {
 		},
 		{
 			title: 'Tasks',
-			url: '/',
+			url: '/tasks',
 			icon: IconSquareRoundedCheck,
 		},
 		{

@@ -63,7 +63,7 @@ export function SplashScreen() {
 	const currentLabel = steps[stepIndex]?.label ?? 'Loading…';
 
 	return (
-		<div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-950 text-white">
+		<div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-card">
 			{/* Background grid */}
 			<div className="pointer-events-none absolute inset-0 opacity-[0.08]">
 				<div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-size-[48px_48px]" />
@@ -76,13 +76,13 @@ export function SplashScreen() {
 
 			{/* Card */}
 			<div className="relative mx-6 w-full max-w-xl">
-				<div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md">
+				<div className="rounded-2xl border border-foreground/10 bg-foreground/5 p-8 shadow-2xl backdrop-blur-md">
 					{/* Top */}
 					<div className="flex items-center gap-3">
 						<div className="relative">
 							{/* Glow */}
 							<div className="absolute -inset-2 rounded-2xl bg-linear-to-r from-fuchsia-500/40 to-sky-500/40 blur-xl" />
-							<div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/15">
+							<div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground/10 ring-1 ring-foreground/15">
 								<img src={logo} alt="Plan Me" className="object-cover" />
 							</div>
 						</div>
@@ -95,17 +95,17 @@ export function SplashScreen() {
 
 					{/* Message */}
 					<div className="mt-6 space-y-3">
-						<p className="text-sm text-white/70">{message}</p>
+						<p className="text-sm text-muted-foreground">{message}</p>
 
 						{/* Progress bar */}
-						<div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+						<div className="h-2 w-full overflow-hidden rounded-full bg-foreground/15">
 							<div
 								className="h-full rounded-full bg-linear-to-r from-fuchsia-500 to-sky-500 transition-[width] duration-200"
 								style={{ width: `${progress}%` }}
 							/>
 						</div>
 
-						<div className="flex items-center justify-between text-xs text-white/50">
+						<div className="flex items-center justify-between text-xs text-muted-foreground/80">
 							<span>Initializing</span>
 							<span>{Math.floor(progress)}%</span>
 						</div>
@@ -113,18 +113,18 @@ export function SplashScreen() {
 
 					{/* Bottom hints */}
 					<div className="mt-8 grid grid-cols-2 gap-3">
-						<div className="rounded-xl border border-white/10 bg-white/5 p-3">
-							<p className="text-xs text-white/60">Offline-first</p>
+						<div className="rounded-xl border border-foreground/10 bg-foreground/5 p-3">
+							<p className="text-xs text-muted-foreground">Offline-first</p>
 							<p className="mt-1 text-sm font-medium">Local cache ready</p>
 						</div>
-						<div className="rounded-xl border border-white/10 bg-white/5 p-3">
-							<p className="text-xs text-white/60">Secure</p>
+						<div className="rounded-xl border border-foreground/10 bg-foreground/5 p-3">
+							<p className="text-xs text-muted-foreground">Secure</p>
 							<p className="mt-1 text-sm font-medium">Encrypted session</p>
 						</div>
 					</div>
 
 					{/* Tiny footer */}
-					<div className="mt-8 flex items-center justify-between text-xs text-white/40">
+					<div className="mt-8 flex items-center justify-between text-xs text-muted-foreground/75">
 						<span className="flex items-center gap-2">
 							<span className="relative inline-flex h-2 w-2">
 								<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/50" />

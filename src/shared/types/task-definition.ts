@@ -12,14 +12,14 @@ export type ITaskPriority = z.infer<typeof taskPrioritySchema>;
 export interface ITaskDefinition {
 	id: string;
 	userId: string;
-	listId: string;
+	listSlug: string;
 	title: string;
 	description?: string | null;
-	deadline?: string | null;
+	deadline?: Date | null;
 	priority: ITaskPriority;
 	isAllDay: boolean;
 	isStarred: boolean;
 	recurrenceRuleId: string;
-	createdAt: string;
-	updatedAt?: string | null;
+	createdAt: Date;
+	updatedAt?: Date | null;
 }

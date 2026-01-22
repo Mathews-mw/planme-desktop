@@ -10,6 +10,7 @@ export const IPC = {
 	},
 	TASK_LIST: {
 		CREATE: 'tasklist:create',
+		GET_BY_SLUG: 'tasklist:get_by_slug',
 		FETCH_ALL: 'tasklist:fetch_all',
 	},
 	TASKS: {
@@ -26,4 +27,4 @@ export const IPC = {
 		UPDATE: 'subtasks:update',
 		DELETE: 'subtasks:delete',
 	},
-};
+} as const;

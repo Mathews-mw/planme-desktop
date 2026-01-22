@@ -14,7 +14,13 @@ interface IItemProps {
 }
 
 export function NavTaskList() {
-	const { data: taskListResponse } = useQuery({ queryKey: ['task-list'], queryFn: taskListRepository.listingAll });
+	const { data: taskListResponse } = useQuery({
+		queryKey: ['task-list'],
+		queryFn: taskListRepository.listingAll,
+		refetchOnWindowFocus: false,
+	});
+
+	console.log('nav taskListResponse: ', taskListResponse);
 
 	const items = useMemo<Array<IItemProps>>(() => {
 		if (!taskListResponse) {
@@ -27,7 +33,7 @@ export function NavTaskList() {
 			return {
 				title: taskList.title,
 				url: `/list/${generateSlug(taskList.title)}`,
-				icon: taskList.icon,
+				icon: taskList.icon || undefined,
 			};
 		});
 	}, [taskListResponse]);

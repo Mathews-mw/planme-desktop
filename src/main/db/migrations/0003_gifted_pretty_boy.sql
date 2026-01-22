@@ -1,0 +1,1 @@
+ALTER TABLE `task_lists` ADD `title` text NOT NULL;

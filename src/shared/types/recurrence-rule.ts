@@ -22,10 +22,12 @@ export interface IRecurrenceRule {
 	id: string;
 	frequency: IRecurrenceFrequency;
 	endType: IRecurrenceEndType;
-	startDateTime?: string | null;
-	endDate?: string | null;
+	startDateTime?: Date | null;
+	endDate?: Date | null;
 	interval?: number | null;
 	weekdays?: Array<number> | null;
 	dayOfMonth?: number | null;
 	maxOccurrences?: number | null;
+	createdAt: Date;
+	updatedAt?: Date | null;
 }

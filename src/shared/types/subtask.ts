@@ -5,7 +5,7 @@ export interface ISubtask {
 	description?: string | null;
 	position: number;
 	isCompleted: boolean;
-	completedAt?: string | null;
-	createdAt: string;
-	updatedAt?: string | null;
+	completedAt?: Date | null;
+	createdAt: Date;
+	updatedAt?: Date | null;
 }

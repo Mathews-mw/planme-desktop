@@ -5,16 +5,16 @@ export interface IAccount {
 	userId: string;
 	provider: AccountProvider;
 	providerAccountId: string;
-	createdAt: string;
-	updatedAt?: string | null;
+	createdAt: Date;
+	updatedAt?: Date | null;
 }
 
 export interface ISession {
 	id: string;
 	userId: string;
 	sessionToken: string;
-	expiresAt: string;
-	registerAt: string;
+	expiresAt: Date;
+	registerAt: Date;
 }
 
 export interface IUser {
@@ -25,8 +25,10 @@ export interface IUser {
 	avatarUrl?: string | null;
 	timezone: string;
 	isActive: boolean;
-	createdAt: string;
-	updatedAt?: string | null;
+	createdAt: Date;
+	updatedAt?: Date | null;
+}
+
+export interface IUserDetails extends IUser {
 	accounts: IAccount[];
-	session?: ISession | null;
 }

@@ -3,9 +3,9 @@ import { hash } from 'bcryptjs';
 import { ipcMain } from 'electron';
 import { randomUUID } from 'node:crypto';
 
-import { store } from '~/src/main/store';
+import { getDb } from '~/src/main/db';
 import { IPC } from '~/src/shared/constants/ipc';
-import { IAccount, IUser } from '~/src/shared/types/user';
+import { accounts, users } from '~/src/main/db/schema';
 import { zodErrorHandler } from '~/src/shared/errors/zod-errors-handler';
 import { ICreateUserRequest, ICreateUserResponse, IpcResponse } from '~/src/shared/types/ipc';
 
@@ -44,26 +44,25 @@ ipcMain.handle(IPC.USERS.CREATE, async (_event, raw: ICreateUserRequest): Promis
 	const hashPassword = await hash(data.password, HASH_SALT_LENGTH);
 
 	try {
-		const account: IAccount = {
+		const db = getDb();
+
+		const [user] = await db
+			.insert(users)
+			.values({
+				id: userId,
+				email: data.email,
+				name: data.name,
+				password: hashPassword,
+				timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+			})
+			.returning();
+
+		await db.insert(accounts).values({
 			id: accountId,
-			userId: userId,
+			userId,
 			provider: 'CREDENTIALS',
 			providerAccountId,
-			createdAt: new Date().toISOString(),
-		};
-
-		const user: IUser = {
-			id: userId,
-			name: data.name,
-			email: data.email,
-			password: hashPassword,
-			isActive: true,
-			createdAt: new Date().toISOString(),
-			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-			accounts: [account],
-		};
-
-		store.set(`users.${user.id}`, user);
+		});
 
 		return { success: true, data: { id: user.id } };
 	} catch (err) {
