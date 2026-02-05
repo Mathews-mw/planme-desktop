@@ -1,6 +1,7 @@
 import { ITask } from './task';
 import { ITaskPriority } from './task-definition';
 import { IRecurrenceEndType, IRecurrenceFrequency } from './recurrence-rule';
+import { ITaskStatus } from './task-occurrence';
 
 // ===IPC Errors ===
 
@@ -41,9 +42,15 @@ export interface ICreateUserRequest {
 }
 
 export interface ISaveTaskListRequest {
+	id?: string;
 	title?: string;
 	icon?: string;
 	position?: number;
+}
+
+export interface ITaskQuery {
+	search?: string;
+	status?: ITaskStatus;
 }
 
 export interface ICreateTaskRequest {
@@ -65,6 +72,10 @@ export interface ICreateTaskRequest {
 		dayOfMonth?: number | null;
 		maxOccurrences?: number | null;
 	};
+}
+
+export interface IToggleTaskComplete {
+	taskDefinitionId: string;
 }
 
 export type ISaveTaskRequest = ITask;

@@ -19,7 +19,7 @@ export function nextDailyIntervalOccurrence(rule: IRecurrenceRule, from: Date): 
 	const startDateTime = dayjs(rule.startDateTime);
 
 	// Se a data de referência ('from') for anterior ao início, a "próxima" é o próprio início.
-	if (dayjs(from).isBefore(startDateTime)) {
+	if (dayjs(from).isBefore(startDateTime) || dayjs(from).isSame(startDateTime)) {
 		return startDateTime.toDate();
 	}
 

@@ -50,6 +50,20 @@
       "when": 1769089402104,
       "tag": "0006_worthless_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1769127039041,
+      "tag": "0007_lame_human_cannonball",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1769214136688,
+      "tag": "0008_faulty_odin",
+      "breakpoints": true
     }
   ]
 }

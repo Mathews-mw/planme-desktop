@@ -30,8 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<IUser | null>(null);
 	const [status, setStatus] = useState<AuthStatus>('unauthenticated');
 
-	console.log('user context: ', user);
-
 	const signInMutation = useMutation({
 		mutationFn: async ({ email, password }: { email: string; password: string }) => {
 			const result = await FirebaseAuthService.signInWithCredentials({ email, password });

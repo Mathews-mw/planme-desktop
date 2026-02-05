@@ -74,7 +74,9 @@ export const taskDefinitions = sqliteTable(
 		userId: text('user_id')
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
-		listSlug: text('list_slug').notNull(),
+		listSlug: text('list_slug')
+			.notNull()
+			.references(() => taskList.slug, { onDelete: 'no action' }),
 		title: text('title').notNull(),
 		description: text('description'),
 		deadline: text('deadline'), // ISO string | null
@@ -94,6 +96,7 @@ export const taskDefinitions = sqliteTable(
 		index('user_id_index').on(table.userId),
 		index('is_starred_index').on(table.isStarred),
 		index('deadline_index').on(table.deadline),
+		index('list_slug_index').on(table.listSlug),
 	]
 );
 
@@ -181,6 +184,10 @@ export const taskDefinitionsRelations = relations(taskDefinitions, ({ one, many 
 		fields: [taskDefinitions.recurrenceRuleId],
 		references: [recurrenceRules.id],
 	}),
+	list: one(taskList, {
+		fields: [taskDefinitions.listSlug],
+		references: [taskList.slug],
+	}),
 	occurrences: many(taskOccurrences),
 	subtasks: many(subtasks),
 }));
@@ -197,4 +204,8 @@ export const subtasksRelations = relations(subtasks, ({ one }) => ({
 		fields: [subtasks.taskDefinitionId],
 		references: [taskDefinitions.id],
 	}),
+}));
+
+export const taskListsRelations = relations(taskList, ({ many }) => ({
+	taskDefinitions: many(taskDefinitions),
 }));

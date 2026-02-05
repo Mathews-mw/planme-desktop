@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 
-import { IRecurrenceData } from './create-task-form';
+import { IRecurrenceData } from './edit-task-form';
 
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
@@ -21,6 +21,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '../ui/dialog';
+import { toWeekdayObjects, weekDays } from '../../utils/weekdays-utils';
 
 interface IProps {
 	openDialog: boolean;
@@ -29,22 +30,8 @@ interface IProps {
 	defaultOptions?: IRecurrenceData;
 }
 
-const weekDays = [
-	{ value: 1, label: 'Monday' },
-	{ value: 2, label: 'Tuesday' },
-	{ value: 3, label: 'Wednesday' },
-	{ value: 4, label: 'Thursday' },
-	{ value: 5, label: 'Friday' },
-	{ value: 6, label: 'Saturday' },
-	{ value: 7, label: 'Sunday' },
-] as const;
-
 function toggleNumberInArray(arr: number[], value: number) {
 	return arr.includes(value) ? arr.filter((x) => x !== value) : [...arr, value];
-}
-
-function toWeekdayObjects(values: number[]) {
-	return values.map((v) => weekDays.find((w) => w.value === v)).filter(Boolean) as Array<(typeof weekDays)[number]>;
 }
 
 const formSchema = z

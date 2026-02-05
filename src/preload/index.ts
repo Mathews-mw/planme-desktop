@@ -11,10 +11,13 @@ import {
 	IGetUserRequest,
 	IpcResponse,
 	ISaveTaskListRequest,
+	ITaskQuery,
+	IToggleTaskComplete,
 } from '../shared/types/ipc';
 
 // Custom APIs for renderer
 const api = {
+	// === Auth ===
 	getLastActiveUser(): Promise<IpcResponse<IUser | null>> {
 		return ipcRenderer.invoke(IPC.AUTH.GET_LAST_ACTIVE_USER);
 	},
@@ -25,6 +28,7 @@ const api = {
 		return ipcRenderer.invoke(IPC.AUTH.CLEAR_LAST_ACTIVE_USER);
 	},
 
+	// === Users ===
 	getUser(data: IGetUserRequest): Promise<IpcResponse<IUser>> {
 		return ipcRenderer.invoke(IPC.USERS.GET, data);
 	},
@@ -32,6 +36,7 @@ const api = {
 		return ipcRenderer.invoke(IPC.USERS.CREATE, data);
 	},
 
+	// === Task Lists ===
 	listingAllTaskLists(): Promise<{ data: ITaskList[] }> {
 		return ipcRenderer.invoke(IPC.TASK_LIST.FETCH_ALL);
 	},
@@ -41,12 +46,25 @@ const api = {
 	createTaskList(data: ISaveTaskListRequest): Promise<IpcResponse<ITaskList>> {
 		return ipcRenderer.invoke(IPC.TASK_LIST.CREATE, data);
 	},
+	editTaskList(data: ISaveTaskListRequest): Promise<IpcResponse<ITaskList>> {
+		return ipcRenderer.invoke(IPC.TASK_LIST.EDIT, data);
+	},
+	deleteTaskList(data: { id: string }): Promise<IpcResponse<null>> {
+		return ipcRenderer.invoke(IPC.TASK_LIST.DELETE, data);
+	},
+	copyTaskList(data: { id: string }): Promise<IpcResponse<ITaskList>> {
+		return ipcRenderer.invoke(IPC.TASK_LIST.COPY, data);
+	},
 
+	// === Tasks ===
 	createTask(data: ICreateTaskRequest): Promise<IpcResponse<ITask>> {
 		return ipcRenderer.invoke(IPC.TASKS.CREATE, data);
 	},
-	listingTasks(): Promise<{ data: ITask[] }> {
-		return ipcRenderer.invoke(IPC.TASKS.FETCH_ALL);
+	listingTasks(query: ITaskQuery): Promise<IpcResponse<ITask[]>> {
+		return ipcRenderer.invoke(IPC.TASKS.FETCH_ALL, query);
+	},
+	toggleCompleteTask(data: IToggleTaskComplete): Promise<IpcResponse<null>> {
+		return ipcRenderer.invoke(IPC.TASKS.TOGGLE_COMPLETE, data);
 	},
 };
 

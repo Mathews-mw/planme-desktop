@@ -6,7 +6,7 @@ export type TaskWithNext = ITask & {
 	nextOccurrenceAt: Date | null;
 };
 
-export function parseIso(v?: string | null) {
+export function parseIso(v?: Date | string | null) {
 	if (!v) return null;
 	const d = new Date(v);
 	return Number.isNaN(d.getTime()) ? null : d;

@@ -1,0 +1,1 @@
+DROP INDEX `task_definitions_list_slug_unique`;

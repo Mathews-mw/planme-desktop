@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { queryClient } from '../../lib/query-client';
 import { useAuth } from '../../context/auth-context';
-import { type ITaskList } from '~/src/shared/types/task';
+import { ITask, type ITaskList } from '~/src/shared/types/task';
 import { errorHandler } from '../../_api/error-handler/error-handler';
 import { taskRepository } from '../../../repositories/tasks-repository';
 import { type ITaskPriority } from '~/src/shared/types/task-definition';
@@ -30,8 +30,10 @@ import { SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, S
 
 import { Loader2, X } from 'lucide-react';
 import { IconCalendarCheck } from '@tabler/icons-react';
+import { toWeekdayObjects } from '../../utils/weekdays-utils';
 
 interface IProps {
+	task: ITask;
 	taskList: ITaskList[];
 	onClose: () => void;
 }
@@ -61,7 +63,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function CreateTaskForm({ taskList, onClose }: IProps) {
+export function EditTaskForm({ task, taskList, onClose }: IProps) {
 	const {
 		control,
 		register,
@@ -71,7 +73,10 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 	} = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			list: 'tasks',
+			title: task.taskDefinition.title,
+			description: task.taskDefinition.description ?? undefined,
+			priority: task.taskDefinition.priority,
+			list: task.taskDefinition.listSlug,
 		},
 	});
 
@@ -81,9 +86,25 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 	const [showRecurrenceDialog, setShowRecurrenceDialog] = useState(false);
 	const [showPickDeadlineDialog, setShowPickDeadlineDialog] = useState(false);
 
-	const [dateTime, setDateTime] = useState<IDateTime | undefined>(undefined);
-	const [deadline, setDeadline] = useState<Date | undefined>(undefined);
-	const [recurrence, setRecurrence] = useState<IRecurrenceData | undefined>(undefined);
+	const [dateTime, setDateTime] = useState<IDateTime | undefined>(
+		task.recurrenceRule.startDateTime
+			? {
+				date: task.recurrenceRule.startDateTime,
+				hour: task.recurrenceRule.startDateTime.getHours().toString(),
+				minute: task.recurrenceRule.startDateTime.getMinutes().toString(),
+			}
+			: undefined
+	);
+	const [deadline, setDeadline] = useState<Date | undefined>(task.taskDefinition.deadline ?? undefined);
+	const [recurrence, setRecurrence] = useState<IRecurrenceData | undefined>({
+		frequency: task.recurrenceRule.frequency,
+		interval: task.recurrenceRule.interval ?? undefined,
+		endDate: task.recurrenceRule.endDate ?? undefined,
+		recurrenceEndType: task.recurrenceRule.endType,
+		dayOfMonth: task.recurrenceRule.dayOfMonth ?? undefined,
+		weekdays: task.recurrenceRule.weekdays ? toWeekdayObjects(task.recurrenceRule.weekdays) : undefined,
+		maxOccurrences: task.recurrenceRule.maxOccurrences ?? undefined,
+	});
 
 	const { mutateAsync: createTaskFn, isPending } = useMutation({
 		mutationFn: taskRepository.create,
@@ -144,8 +165,8 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 		<>
 			<SheetContent>
 				<SheetHeader>
-					<SheetTitle>Create a New Task</SheetTitle>
-					<SheetDescription>After filling in the fields, click save to create a new task.</SheetDescription>
+					<SheetTitle>Edit Task</SheetTitle>
+					<SheetDescription>Edit your task information here.</SheetDescription>
 				</SheetHeader>
 
 				<form id="createTask" onSubmit={handleSubmit(handleCreateTask)} className="flex flex-col gap-4 px-4">

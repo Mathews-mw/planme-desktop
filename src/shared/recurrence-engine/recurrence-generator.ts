@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import objectSupport from 'dayjs/plugin/objectSupport';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+import objectSupport from 'dayjs/plugin/objectSupport.js';
 
 import { IRecurrenceRule } from '../types/recurrence-rule';
 import { nextDailyIntervalOccurrence } from './get-next-daily-occurrence';
@@ -42,7 +42,11 @@ export function generateOccurrences({
 	maxToGenerate = 1,
 	alreadyGeneratedCount = 0,
 }: IGenerateOccurrencesRequest): Array<Date> {
-	if (rule.frequency === 'NONE') {
+	if (rule.frequency === 'NONE' || rule.endType === 'ONCE') {
+		if (rule.startDateTime) {
+			return [rule.startDateTime];
+		}
+
 		return [];
 	}
 

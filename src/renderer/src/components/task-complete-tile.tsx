@@ -1,43 +1,27 @@
-import dayjs from 'dayjs';
+import { useState } from 'react';
 
-import { type TaskWithNext } from '~/src/shared/helpers/group-tasks-utilities';
+import { type ITask } from '~/src/shared/types/task';
 
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-
-import {
-	IconCalendarTime,
-	IconDotsVertical,
-	IconNote,
-	IconPointFilled,
-	IconRefresh,
-	IconStar,
-} from '@tabler/icons-react';
-import { Pen } from 'lucide-react';
-import { useState } from 'react';
 import { EditTaskSheet } from './edit-task-sheet/edit-task-sheet';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+
+import { Pen } from 'lucide-react';
+import { IconDotsVertical, IconNote, IconPointFilled, IconRefresh, IconStar } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { taskRepository } from '../../repositories/tasks-repository';
-import { ITask } from '~/src/shared/types/task';
 import { queryClient } from '../lib/query-client';
 
 interface IProps {
-	task: TaskWithNext;
+	task: ITask;
 	isActive?: boolean;
-	onOpenDetails: (task: TaskWithNext) => void;
+	onOpenDetails: (task: ITask) => void;
 }
 
-export function TaskTile({ task, isActive, onOpenDetails }: IProps) {
+export function TaskCompleteTile({ task, isActive, onOpenDetails }: IProps) {
 	const [openEditTaskSheet, setOpenEditTaskSheet] = useState(false);
-	const [selectedTask, setSelectedTask] = useState<TaskWithNext | undefined>(undefined);
+	const [selectedTask, setSelectedTask] = useState<ITask | undefined>(undefined);
 
 	const { mutateAsync: toggleCompleteFn, isPending } = useMutation({
 		mutationFn: taskRepository.toggleComplete,
@@ -46,7 +30,7 @@ export function TaskTile({ task, isActive, onOpenDetails }: IProps) {
 		},
 	});
 
-	function handleOpenEditTaskSheet(open: boolean, task?: TaskWithNext) {
+	function handleOpenEditTaskSheet(open: boolean, task?: ITask) {
 		if (open) {
 			setOpenEditTaskSheet(true);
 			setSelectedTask(task);
@@ -65,6 +49,7 @@ export function TaskTile({ task, isActive, onOpenDetails }: IProps) {
 			>
 				<Checkbox
 					className="shrink-0"
+					checked={task.occurrences[0].status === 'COMPLETED'}
 					onClick={(e) => e.stopPropagation()}
 					onCheckedChange={async (checked) => {
 						console.log('checked: ', checked);
@@ -73,7 +58,7 @@ export function TaskTile({ task, isActive, onOpenDetails }: IProps) {
 				/>
 
 				<div className="flex w-full flex-1 grow flex-col">
-					<span className="text-lg font-semibold">{task.taskDefinition.title}</span>
+					<span className="text-lg font-semibold text-muted-foreground line-through">{task.taskDefinition.title}</span>
 
 					<div className="flex items-center gap-1">
 						{task.subtasks && task.subtasks.length > 0 && (
@@ -82,16 +67,6 @@ export function TaskTile({ task, isActive, onOpenDetails }: IProps) {
 									<span>2 de 5</span>
 								</div>
 
-								<IconPointFilled className="size-4 text-muted-foreground" />
-							</div>
-						)}
-
-						{task.nextOccurrenceAt && (
-							<div className="flex items-center gap-1">
-								<div className="flex items-center gap-1">
-									<IconCalendarTime className="size-4 text-muted-foreground" />
-									<span className="text-sm text-sky-500">{dayjs(task.nextOccurrenceAt).format('HH:mm')}</span>
-								</div>
 								<IconPointFilled className="size-4 text-muted-foreground" />
 							</div>
 						)}

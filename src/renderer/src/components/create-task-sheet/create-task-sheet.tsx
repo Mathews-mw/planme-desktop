@@ -19,12 +19,10 @@ export function CreateTaskSheet() {
 		enabled: openSheet,
 	});
 
-	console.log('taskListResponse: ', taskListResponse);
-
 	return (
 		<Sheet open={openSheet} onOpenChange={setOpenSheet}>
 			<SheetTrigger asChild>
-				<Button variant="secondary" disabled={!taskListResponse} className="hidden sm:flex">
+				<Button variant="secondary" className="hidden sm:flex">
 					<Plus /> New Task
 				</Button>
 			</SheetTrigger>

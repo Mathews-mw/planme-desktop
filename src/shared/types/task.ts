@@ -6,7 +6,7 @@ import { ITaskOccurrence } from './task-occurrence';
 export interface ITask {
 	taskDefinition: ITaskDefinition;
 	recurrenceRule: IRecurrenceRule;
-	occurrences?: Array<ITaskOccurrence> | null;
+	occurrences: Array<ITaskOccurrence>;
 	subtasks?: Array<ISubtask> | null;
 }
 

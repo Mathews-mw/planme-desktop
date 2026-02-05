@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { app, shell, BrowserWindow, ipcMain, session } from 'electron';
+import { app, shell, BrowserWindow, session } from 'electron';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 
 import icon from '../../resources/icon.png';

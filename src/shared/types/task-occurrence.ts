@@ -1,9 +1,18 @@
-export type ITaskStatus = 'PENDING' | 'COMPLETED' | 'CANCELED' | 'SKIPPED';
+import z from 'zod';
+
+export const taskStatusSchema = z.union([
+	z.literal('PENDING'),
+	z.literal('COMPLETED'),
+	z.literal('CANCELED'),
+	z.literal('SKIPPED'),
+]);
+
+export type ITaskStatus = z.infer<typeof taskStatusSchema>;
 
 export interface ITaskOccurrence {
 	id: string;
 	taskDefinitionId: string;
-	occurrenceDateTime?: Date | null;
+	occurrenceDateTime: Date;
 	status: ITaskStatus;
 	note?: string | null;
 	completedAt?: Date | null;

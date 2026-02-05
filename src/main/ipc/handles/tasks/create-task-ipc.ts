@@ -129,6 +129,7 @@ ipcMain.handle(IPC.TASKS.CREATE, async (_event, raw: ICreateTaskRequest): Promis
 
 		return { success: true, data: task };
 	} catch (err) {
+		console.log('Internal error: ', err);
 		return {
 			success: false,
 			error: {
