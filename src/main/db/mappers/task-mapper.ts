@@ -8,7 +8,7 @@ import { DrizzleRecurrenceRule, DrizzleSubtask, DrizzleTaskDefinition, DrizzleTa
 interface IRequestToDomain {
 	taskDefinition: DrizzleTaskDefinition;
 	recurrenceRule: DrizzleRecurrenceRule;
-	occurrences?: DrizzleTaskOccurrence[] | null;
+	occurrences: DrizzleTaskOccurrence[];
 	subtasks?: DrizzleSubtask[] | null;
 }
 
@@ -17,7 +17,7 @@ export class TaskMapper {
 		return {
 			taskDefinition: TaskDefinitionMapper.toDomain(data.taskDefinition),
 			recurrenceRule: RecurrenceRuleMapper.toDomain(data.recurrenceRule),
-			occurrences: data.occurrences ? data.occurrences.map(TaskOccurrenceMapper.toDomain) : null,
+			occurrences: data.occurrences.map(TaskOccurrenceMapper.toDomain),
 			subtasks: data.subtasks ? data.subtasks.map(SubtaskMapper.toDomain) : null,
 		};
 	}

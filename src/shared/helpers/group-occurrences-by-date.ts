@@ -1,16 +1,22 @@
-import type { ITask } from '../types/task';
-import { dayKeyLocal, groupTitle, type GroupTasksKey, type TaskWithNext } from './group-tasks-utilities';
+import { ITaskOccurrenceDetails } from '../types/task-occurrence';
+import { dayKeyLocal, groupTitle, type GroupTasksKey } from './group-tasks-utilities';
 
-export function groupOccurrencesByDate({ tasks, now = new Date() }: { tasks: ITask[]; now?: Date }) {
-	const enriched: TaskWithNext[] = tasks.map((t) => ({
-		...t,
-		nextOccurrenceAt: t.occurrences[0].occurrenceDateTime,
-	}));
+export function groupOccurrencesByDate({
+	occurrences,
+	now = new Date(),
+}: {
+	occurrences: ITaskOccurrenceDetails[];
+	now?: Date;
+}) {
+	// const enriched: TaskWithNext[] = occurrences.map((occ) => ({
+	// 	...occ,
+	// 	nextOccurrenceAt: occ.occurrenceDateTime,
+	// }));
 
-	const map = new Map<GroupTasksKey, TaskWithNext[]>();
+	const map = new Map<GroupTasksKey, ITaskOccurrenceDetails[]>();
 
-	for (const t of enriched) {
-		const next = t.nextOccurrenceAt;
+	for (const occ of occurrences) {
+		const next = occ.occurrenceDateTime;
 
 		let key: GroupTasksKey;
 
@@ -27,7 +33,9 @@ export function groupOccurrencesByDate({ tasks, now = new Date() }: { tasks: ITa
 		}
 
 		const arr = map.get(key) ?? [];
-		arr.push(t);
+
+		arr.push(occ);
+
 		map.set(key, arr);
 	}
 
@@ -57,8 +65,8 @@ export function groupOccurrencesByDate({ tasks, now = new Date() }: { tasks: ITa
 	// Ordenar itens dentro do grupo
 	for (const g of groups) {
 		g.items.sort((a, b) => {
-			const ta = a.nextOccurrenceAt?.getTime() ?? Number.MAX_SAFE_INTEGER;
-			const tb = b.nextOccurrenceAt?.getTime() ?? Number.MAX_SAFE_INTEGER;
+			const ta = a.occurrenceDateTime?.getTime() ?? Number.MAX_SAFE_INTEGER;
+			const tb = b.occurrenceDateTime?.getTime() ?? Number.MAX_SAFE_INTEGER;
 
 			if (g.key === 'overdue') return ta - tb; // mais antigo primeiro
 			return ta - tb; // normal: mais cedo primeiro

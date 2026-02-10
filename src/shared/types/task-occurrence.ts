@@ -1,4 +1,7 @@
 import z from 'zod';
+import { ITaskDefinition } from './task-definition';
+import { IRecurrenceRule } from './recurrence-rule';
+import { ISubtask } from './subtask';
 
 export const taskStatusSchema = z.union([
 	z.literal('PENDING'),
@@ -18,4 +21,13 @@ export interface ITaskOccurrence {
 	completedAt?: Date | null;
 	createdAt: Date;
 	updatedAt?: Date | null;
+}
+
+interface TaskDefinitionWithProps extends ITaskDefinition {
+	recurrenceRule: IRecurrenceRule;
+	subtasks: Array<ISubtask>;
+}
+
+export interface ITaskOccurrenceDetails extends ITaskOccurrence {
+	taskDefinition: TaskDefinitionWithProps;
 }

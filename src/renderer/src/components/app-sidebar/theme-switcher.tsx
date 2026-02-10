@@ -1,4 +1,4 @@
-import { useTheme } from '~/src/providers/theme-provider';
+import { useTheme } from '~/src/renderer/src/providers/theme-provider';
 import { DropdownMenuItem } from '../ui/dropdown-menu';
 
 import { Moon, SunMedium } from 'lucide-react';

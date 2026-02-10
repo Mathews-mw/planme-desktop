@@ -110,7 +110,7 @@ export const taskOccurrences = sqliteTable(
 		taskDefinitionId: text('task_definition_id')
 			.notNull()
 			.references(() => taskDefinitions.id, { onDelete: 'cascade' }),
-		occurrenceDateTime: text('occurrence_date_time'), // ISO string
+		occurrenceDateTime: text('occurrence_date_time').notNull(), // ISO string
 		status: text('status').notNull().$type<'PENDING' | 'COMPLETED' | 'CANCELED' | 'SKIPPED'>().default('PENDING'),
 		note: text('note'),
 		completedAt: text('completed_at'), // ISO string

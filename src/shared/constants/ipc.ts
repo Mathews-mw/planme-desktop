@@ -24,6 +24,9 @@ export const IPC = {
 		DELETE: 'tasks:delete',
 		TOGGLE_COMPLETE: 'tasks:toggle_complete',
 	},
+	OCCURRENCES: {
+		FETCH_ALL: 'occurrences:fetch_all',
+	},
 	SUBTASKS: {
 		FETCH_ALL: 'subtasks:fetch_all',
 		GET: 'subtasks:get',

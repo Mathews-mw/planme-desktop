@@ -2,46 +2,50 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
-import { taskRepository } from '~/src/renderer/repositories/tasks-repository';
+import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
+import { groupOccurrencesByDate } from '~/src/shared/helpers/group-occurrences-by-date';
+import { occurrencesRepository } from '~/src/renderer/repositories/occurrences-repository';
 
 import { TaskTile } from '../../components/task-tile';
 import { Container } from '../../components/container';
+import { TaskCompleteList } from '../../components/task-complete-list';
+import { TaskDetailsPanel } from '../../components/task-details-panel/task-details-panel';
 
 import { IconSquareRoundedCheckFilled } from '@tabler/icons-react';
-import { TaskWithNext } from '~/src/shared/helpers/group-tasks-utilities';
-import { TaskDetailsPanel } from '../../components/task-details-panel/task-details-panel';
-import { groupOccurrencesByDate } from '~/src/shared/helpers/group-occurrences-by-date';
-import { TaskCompleteList } from '../../components/task-complete-list';
 
 export function TasksPage() {
 	const [now, setNow] = useState(() => new Date());
-	const [selectedTask, setSelectedTask] = useState<TaskWithNext | undefined>();
 	const [detailsOpen, setDetailsOpen] = useState(false);
+	const [selectedOccurrence, setSelectedOccurrence] = useState<ITaskOccurrenceDetails | undefined>();
 
 	const [animatedContainer] = useAutoAnimate();
 	const [parent] = useAutoAnimate();
 
-	const { data: tasksResponse } = useQuery({
-		queryKey: ['tasks', 'status:PENDING'],
-		queryFn: async () => taskRepository.listingTasks({ status: 'PENDING' }),
+	const { data: occsResponse } = useQuery({
+		queryKey: ['occurrences', 'status:PENDING'],
+		queryFn: async () => occurrencesRepository.listingOccurrences({ status: 'PENDING' }),
 	});
 
 	const groups = useMemo(() => {
-		if (!tasksResponse || !tasksResponse.success) {
+		if (!occsResponse || !occsResponse.success) {
 			return [];
 		}
 
-		return groupOccurrencesByDate({ tasks: tasksResponse.data, now });
-	}, [tasksResponse, now]);
+		const group = groupOccurrencesByDate({ occurrences: occsResponse.data, now });
 
-	function openDetails(task: TaskWithNext) {
-		setSelectedTask(task);
+		return group;
+	}, [occsResponse, now]);
+
+	function openDetails(occurrence?: ITaskOccurrenceDetails) {
+		console.log('open occurrence details: ', occurrence);
+
+		setSelectedOccurrence(occurrence);
 		setDetailsOpen(true);
 	}
 
 	function closeDetails(open: boolean) {
 		setDetailsOpen(open);
-		if (!open) setSelectedTask(undefined);
+		if (!open) setSelectedOccurrence(undefined);
 	}
 
 	useEffect(() => {
@@ -73,12 +77,12 @@ export function TasksPage() {
 									</h4>
 
 									<ul ref={parent} className="space-y-2">
-										{group.items.map((task) => {
+										{group.items.map((occurrence) => {
 											return (
-												<li key={task.taskDefinition.id}>
+												<li key={occurrence.id}>
 													<TaskTile
-														task={task}
-														isActive={detailsOpen && selectedTask?.taskDefinition.id === task.taskDefinition.id}
+														occurrence={occurrence}
+														isActive={detailsOpen && selectedOccurrence?.id === occurrence.id}
 														onOpenDetails={openDetails}
 													/>
 												</li>
@@ -94,7 +98,7 @@ export function TasksPage() {
 				<TaskCompleteList parentRef={parent} />
 			</div>
 
-			<TaskDetailsPanel open={detailsOpen} onOpenChange={closeDetails} task={selectedTask} />
+			<TaskDetailsPanel open={detailsOpen} onOpenChange={closeDetails} occurrence={selectedOccurrence} />
 		</>
 	);
 }

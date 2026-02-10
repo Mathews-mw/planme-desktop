@@ -12,7 +12,7 @@ import { queryClient } from './lib/query-client';
 import { Toaster } from './components/ui/sonner';
 import { runAuthBoot } from './boot/run-auth-boot';
 import { SplashScreen } from './components/splash-screen';
-import { ThemeProvider } from '~/src/providers/theme-provider';
+import { ThemeProvider } from '~/src/renderer/src/providers/theme-provider';
 import { AuthProvider, useAuth } from './context/auth-context';
 import { BootErrorScreen } from './components/boot-error-screen';
 import { BootManagerProvider, useBootManager } from './context/boot-manager-context';

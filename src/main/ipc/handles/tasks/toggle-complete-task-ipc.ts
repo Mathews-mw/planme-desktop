@@ -1,14 +1,19 @@
 import z from 'zod';
-import { ipcMain } from 'electron';
-
+import dayjs from 'dayjs';
 import { eq } from 'drizzle-orm';
+import { ipcMain } from 'electron';
+import { randomUUID } from 'node:crypto';
+
 import { getDb } from '~/src/main/db';
 import { IPC } from '~/src/shared/constants/ipc';
 import { taskOccurrences } from '~/src/main/db/schema';
 import { zodErrorHandler } from '~/src/shared/errors/zod-errors-handler';
 import { IpcResponse, IToggleTaskComplete } from '~/src/shared/types/ipc';
+import { RecurrenceRuleMapper } from '~/src/main/db/mappers/recurrence-rule-mapper';
+import { TaskOccurrencesPlanner } from '~/src/shared/recurrence-engine/task-occurrences-planner';
 
 const requestSchema = z.object({
+	occurrenceId: z.string(),
 	taskDefinitionId: z.string(),
 });
 
@@ -28,18 +33,16 @@ ipcMain.handle(IPC.TASKS.TOGGLE_COMPLETE, async (_event, raw: IToggleTaskComplet
 		};
 	}
 
-	const { taskDefinitionId } = parse.data;
+	const { occurrenceId, taskDefinitionId } = parse.data;
 	const db = getDb();
 
 	try {
-		console.log('update taskDefinitionId: ', taskDefinitionId);
-
 		const taskDefinition = await db.query.taskDefinitions.findFirst({
 			where: (fields, operators) => operators.eq(fields.id, taskDefinitionId),
 		});
 
 		const taskOccurrence = await db.query.taskOccurrences.findFirst({
-			where: (fields, operators) => operators.and(operators.eq(fields.taskDefinitionId, taskDefinitionId)),
+			where: (fields, operators) => operators.eq(fields.id, occurrenceId),
 			orderBy: (fields, operators) => operators.desc(fields.createdAt),
 		});
 
@@ -70,20 +73,51 @@ ipcMain.handle(IPC.TASKS.TOGGLE_COMPLETE, async (_event, raw: IToggleTaskComplet
 		if (taskOccurrence.status === 'COMPLETED' && taskOccurrence.completedAt) {
 			taskOccurrence.status = 'PENDING';
 			taskOccurrence.completedAt = null;
+			taskOccurrence.updatedAt = new Date().toISOString();
 		} else {
 			taskOccurrence.status = 'COMPLETED';
 			taskOccurrence.completedAt = new Date().toISOString();
-
-			// aqui vai ser necessário gerar uma nova ocorrência
+			taskOccurrence.updatedAt = new Date().toISOString();
 		}
 
-		const result = await db
-			.update(taskOccurrences)
-			.set(taskOccurrence)
-			.where(eq(taskOccurrences.id, taskOccurrence.id))
-			.returning();
+		// ==> Update current occurrence status status
+		await db.update(taskOccurrences).set(taskOccurrence).where(eq(taskOccurrences.id, taskOccurrence.id)).returning();
 
-		console.log('update result: ', result);
+		// ==> Calculates the date of the new occurrence, if necessary.
+		const existingPendingOccurrences = await db.query.taskOccurrences.findMany({
+			where: (fields, operators) =>
+				operators.and(operators.eq(fields.taskDefinitionId, taskDefinition.id), eq(fields.status, 'PENDING')),
+		});
+
+		console.log('existingPendingOccurrences: ', existingPendingOccurrences);
+
+		const anyFutureOccurrences = existingPendingOccurrences.some((occ) => dayjs(occ.occurrenceDateTime).isAfter());
+		console.log('anyFutureOccurrences: ', anyFutureOccurrences);
+
+		if (!anyFutureOccurrences) {
+			console.log('should create new occurrence');
+
+			const generateOccurrences = TaskOccurrencesPlanner.generateInitialOccurrences({
+				rule: RecurrenceRuleMapper.toDomain(recurrenceRule),
+				fromDate: new Date(taskOccurrence.occurrenceDateTime),
+				horizonDays: 365,
+				limit: 1,
+			});
+
+			console.log('new occurrences dates: ', generateOccurrences);
+
+			if (generateOccurrences.length > 0) {
+				const firstOccurrenceDay = generateOccurrences[0];
+				console.log('firstOccurrenceDay: ', firstOccurrenceDay);
+
+				await db.insert(taskOccurrences).values({
+					id: randomUUID(),
+					taskDefinitionId: taskDefinition.id,
+					occurrenceDateTime: firstOccurrenceDay.toISOString(),
+					status: 'PENDING',
+				});
+			}
+		}
 
 		return { success: true, data: null };
 	} catch (error) {

@@ -43,10 +43,6 @@ export function generateOccurrences({
 	alreadyGeneratedCount = 0,
 }: IGenerateOccurrencesRequest): Array<Date> {
 	if (rule.frequency === 'NONE' || rule.endType === 'ONCE') {
-		if (rule.startDateTime) {
-			return [rule.startDateTime];
-		}
-
 		return [];
 	}
 

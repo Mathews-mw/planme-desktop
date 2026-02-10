@@ -7,5 +7,4 @@ out
 
 *.env
 
-notes.md
 dev.sqlite

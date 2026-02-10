@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
-import { type ITask } from '~/src/shared/types/task';
-import { taskRepository } from '../../repositories/tasks-repository';
+import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
+import { occurrencesRepository } from '../../repositories/occurrences-repository';
 
 import { Container } from './container';
 import { TaskCompleteTile } from './task-complete-tile';
-import autoAnimate from '@formkit/auto-animate';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 interface TaskCompleteListProps {
@@ -16,49 +15,50 @@ interface TaskCompleteListProps {
 
 export function TaskCompleteList({ parentRef }: TaskCompleteListProps) {
 	const [show, setShow] = useState(false);
-	const [selectedTask, setSelectedTask] = useState<ITask | undefined>();
+	const [selectedOccurrence, setSelectedOccurrence] = useState<ITaskOccurrenceDetails | undefined>();
 	const [detailsOpen, setDetailsOpen] = useState(false);
 
 	const [listRef] = useAutoAnimate();
 
-	const { data: tasksResponse } = useQuery({
-		queryKey: ['tasks', 'status:COMPLETED'],
-		queryFn: async () => taskRepository.listingTasks({ status: 'COMPLETED' }),
+	const { data: occsResponse } = useQuery({
+		queryKey: ['occurrences', 'status:COMPLETED'],
+		queryFn: async () =>
+			occurrencesRepository.listingOccurrences({ status: 'COMPLETED', orderBy: 'recently_completed' }),
 	});
 
 	const tasks = useMemo(() => {
-		if (!tasksResponse || !tasksResponse.success) {
+		if (!occsResponse || !occsResponse.success) {
 			return [];
 		}
 
-		return tasksResponse.data;
-	}, [tasksResponse]);
+		return occsResponse.data;
+	}, [occsResponse]);
 
-	function openDetails(task: ITask) {
-		setSelectedTask(task);
+	function openDetails(occ: ITaskOccurrenceDetails) {
+		setSelectedOccurrence(occ);
 		setDetailsOpen(true);
 	}
 
 	function closeDetails(open: boolean) {
 		setDetailsOpen(open);
-		if (!open) setSelectedTask(undefined);
+		if (!open) setSelectedOccurrence(undefined);
 	}
 
 	return (
 		<>
-			{tasksResponse && tasks.length > 0 && (
+			{occsResponse && tasks.length > 0 && (
 				<Container>
-					<Accordion type="single" collapsible defaultValue="tasks-completed">
-						<AccordionItem value="tasks-completed">
+					<Accordion type="single" collapsible defaultValue="completed-tasks">
+						<AccordionItem value="completed-tasks">
 							<AccordionTrigger>Completed Tasks</AccordionTrigger>
 							<AccordionContent>
 								<ul ref={listRef} className="space-y-2">
-									{tasks.map((task) => {
+									{tasks.map((occurrence) => {
 										return (
-											<li key={task.taskDefinition.id}>
+											<li key={occurrence.id}>
 												<TaskCompleteTile
-													task={task}
-													isActive={detailsOpen && selectedTask?.taskDefinition.id === task.taskDefinition.id}
+													occurrence={occurrence}
+													isActive={detailsOpen && selectedOccurrence?.id === occurrence.id}
 													onOpenDetails={openDetails}
 												/>
 											</li>

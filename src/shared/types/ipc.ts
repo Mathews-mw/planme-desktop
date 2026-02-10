@@ -53,6 +53,12 @@ export interface ITaskQuery {
 	status?: ITaskStatus;
 }
 
+export interface IOccurrencesQuery {
+	search?: string;
+	status?: ITaskStatus;
+	orderBy?: 'latest' | 'oldest' | 'recently_updated' | 'recently_completed';
+}
+
 export interface ICreateTaskRequest {
 	definition: {
 		userId?: string;
@@ -75,6 +81,7 @@ export interface ICreateTaskRequest {
 }
 
 export interface IToggleTaskComplete {
+	occurrenceId: string;
 	taskDefinitionId: string;
 }
 

@@ -1,15 +1,15 @@
 import z from 'zod';
 import { ipcMain } from 'electron';
+import { and, eq } from 'drizzle-orm';
 
 import { getDb } from '~/src/main/db';
 import { ITask } from '~/src/shared/types/task';
 import { IPC } from '~/src/shared/constants/ipc';
+import { taskOccurrences } from '~/src/main/db/schema';
 import { TaskMapper } from '~/src/main/db/mappers/task-mapper';
 import { IpcResponse, ITaskQuery } from '~/src/shared/types/ipc';
 import { taskStatusSchema } from '~/src/shared/types/task-occurrence';
 import { zodErrorHandler } from '~/src/shared/errors/zod-errors-handler';
-import { taskOccurrences } from '~/src/main/db/schema';
-import { and, eq } from 'drizzle-orm';
 
 const queryRequestSchema = z.object({
 	search: z.string().nullable().optional(),
@@ -34,16 +34,9 @@ ipcMain.handle(IPC.TASKS.FETCH_ALL, async (_event, query: ITaskQuery): Promise<I
 
 	const { search, status } = parse.data;
 
-	console.log('search: ', search);
-	console.log('status: ', status);
-
 	const db = getDb();
 
 	const tasks = await db.query.taskDefinitions.findMany({
-		// where: search
-		// 	? (fields, operators) =>
-		// 			operators.like(operators.sql`lower(${fields.title})`, `%${search?.trim().toLowerCase()}%`)
-		// 	: undefined,
 		where: (fields, operators) => {
 			const conditions = [];
 
@@ -69,8 +62,9 @@ ipcMain.handle(IPC.TASKS.FETCH_ALL, async (_event, query: ITaskQuery): Promise<I
 			occurrences: status
 				? {
 						where: (fields, operators) => operators.eq(fields.status, status),
+						orderBy: (fields, operators) => operators.desc(fields.createdAt),
 					}
-				: true,
+				: { orderBy: (fields, operators) => operators.desc(fields.createdAt) },
 			subtasks: true,
 		},
 	});

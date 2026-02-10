@@ -51,6 +51,13 @@ declare global {
 			toggleCompleteTask(
 				data: import('../shared/types/ipc').IToggleTaskComplete
 			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+
+			// === Occurrences ===
+			listingOccurrences(
+				query: import('../shared/types/ipc').IOccurrencesQuery
+			): Promise<
+				import('../shared/types/ipc').IpcResponse<import('../shared/types/task-occurrence').ITaskOccurrenceDetails[]>
+			>;
 		};
 	}
 }

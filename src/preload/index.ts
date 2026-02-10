@@ -4,11 +4,13 @@ import { electronAPI } from '@electron-toolkit/preload';
 import { IUser } from '../shared/types/user';
 import { IPC } from '../shared/constants/ipc';
 import { ITask, ITaskList } from '../shared/types/task';
+import { ITaskOccurrenceDetails } from '../shared/types/task-occurrence';
 import {
 	ICreateTaskRequest,
 	ICreateUserRequest,
 	ICreateUserResponse,
 	IGetUserRequest,
+	IOccurrencesQuery,
 	IpcResponse,
 	ISaveTaskListRequest,
 	ITaskQuery,
@@ -65,6 +67,11 @@ const api = {
 	},
 	toggleCompleteTask(data: IToggleTaskComplete): Promise<IpcResponse<null>> {
 		return ipcRenderer.invoke(IPC.TASKS.TOGGLE_COMPLETE, data);
+	},
+
+	// === Occurrences ===
+	listingOccurrences(query: IOccurrencesQuery): Promise<IpcResponse<ITaskOccurrenceDetails[]>> {
+		return ipcRenderer.invoke(IPC.OCCURRENCES.FETCH_ALL, query);
 	},
 };
 

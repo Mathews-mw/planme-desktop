@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { type ITask } from '~/src/shared/types/task';
 
@@ -12,25 +12,27 @@ import { IconDotsVertical, IconNote, IconPointFilled, IconRefresh, IconStar } fr
 import { useMutation } from '@tanstack/react-query';
 import { taskRepository } from '../../repositories/tasks-repository';
 import { queryClient } from '../lib/query-client';
+import { ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
+import dayjs from 'dayjs';
 
 interface IProps {
-	task: ITask;
+	occurrence: ITaskOccurrenceDetails;
 	isActive?: boolean;
-	onOpenDetails: (task: ITask) => void;
+	onOpenDetails: (task: ITaskOccurrenceDetails) => void;
 }
 
-export function TaskCompleteTile({ task, isActive, onOpenDetails }: IProps) {
+export function TaskCompleteTile({ occurrence, isActive, onOpenDetails }: IProps) {
 	const [openEditTaskSheet, setOpenEditTaskSheet] = useState(false);
-	const [selectedTask, setSelectedTask] = useState<ITask | undefined>(undefined);
+	const [selectedTask, setSelectedTask] = useState<ITaskOccurrenceDetails | undefined>(undefined);
 
 	const { mutateAsync: toggleCompleteFn, isPending } = useMutation({
 		mutationFn: taskRepository.toggleComplete,
 		onSuccess: async () => {
-			queryClient.invalidateQueries({ queryKey: ['tasks'] });
+			queryClient.invalidateQueries({ queryKey: ['occurrences'] });
 		},
 	});
 
-	function handleOpenEditTaskSheet(open: boolean, task?: ITask) {
+	function handleOpenEditTaskSheet(open: boolean, task?: ITaskOccurrenceDetails) {
 		if (open) {
 			setOpenEditTaskSheet(true);
 			setSelectedTask(task);
@@ -44,24 +46,35 @@ export function TaskCompleteTile({ task, isActive, onOpenDetails }: IProps) {
 		<>
 			<div
 				data-state={isActive ? 'open' : 'close'}
-				onClick={() => onOpenDetails(task)}
+				onClick={() => onOpenDetails(occurrence)}
 				className="flex w-full items-baseline justify-between gap-2 rounded-md border bg-card p-2 hover:bg-primary/10 data-[state=open]:bg-primary/10"
 			>
 				<Checkbox
 					className="shrink-0"
-					checked={task.occurrences[0].status === 'COMPLETED'}
+					checked={occurrence.status === 'COMPLETED'}
 					onClick={(e) => e.stopPropagation()}
 					onCheckedChange={async (checked) => {
 						console.log('checked: ', checked);
-						await toggleCompleteFn({ taskDefinitionId: task.taskDefinition.id });
+						await toggleCompleteFn({ occurrenceId: occurrence.id, taskDefinitionId: occurrence.taskDefinitionId });
 					}}
 				/>
 
 				<div className="flex w-full flex-1 grow flex-col">
-					<span className="text-lg font-semibold text-muted-foreground line-through">{task.taskDefinition.title}</span>
+					<span className="text-lg font-semibold text-muted-foreground line-through">
+						{occurrence.taskDefinition.title}
+					</span>
 
 					<div className="flex items-center gap-1">
-						{task.subtasks && task.subtasks.length > 0 && (
+						<div className="flex items-center gap-1">
+							<div className="flex items-center gap-1">
+								<span className="text-sm text-muted-foreground">
+									Completed on {dayjs(occurrence.completedAt).format('MMM, DD [at] HH:mm')}
+								</span>
+							</div>
+							<IconPointFilled className="size-4 text-muted-foreground" />
+						</div>
+
+						{occurrence.taskDefinition.subtasks && occurrence.taskDefinition.subtasks.length > 0 && (
 							<div className="flex items-center gap-1">
 								<div className="text-sm text-muted-foreground">
 									<span>2 de 5</span>
@@ -71,14 +84,15 @@ export function TaskCompleteTile({ task, isActive, onOpenDetails }: IProps) {
 							</div>
 						)}
 
-						{task.recurrenceRule.frequency !== 'NONE' && task.recurrenceRule.endType !== 'ONCE' && (
-							<div className="flex items-center gap-1">
-								<IconRefresh className="size-4 text-muted-foreground" />
-								<IconPointFilled className="size-4 text-muted-foreground" />
-							</div>
-						)}
+						{occurrence.taskDefinition.recurrenceRule.frequency !== 'NONE' &&
+							occurrence.taskDefinition.recurrenceRule.endType !== 'ONCE' && (
+								<div className="flex items-center gap-1">
+									<IconRefresh className="size-4 text-muted-foreground" />
+									<IconPointFilled className="size-4 text-muted-foreground" />
+								</div>
+							)}
 
-						{task.taskDefinition.description && <IconNote className="size-4 text-muted-foreground" />}
+						{occurrence.taskDefinition.description && <IconNote className="size-4 text-muted-foreground" />}
 					</div>
 				</div>
 
@@ -110,7 +124,7 @@ export function TaskCompleteTile({ task, isActive, onOpenDetails }: IProps) {
 								onSelect={(e) => {
 									e.preventDefault();
 									e.stopPropagation();
-									handleOpenEditTaskSheet(true, task);
+									handleOpenEditTaskSheet(true, occurrence);
 								}}
 							>
 								<Pen /> Edit
@@ -123,11 +137,11 @@ export function TaskCompleteTile({ task, isActive, onOpenDetails }: IProps) {
 				</div>
 			</div>
 
-			<EditTaskSheet
+			{/* <EditTaskSheet
 				task={task}
 				open={openEditTaskSheet && selectedTask?.taskDefinition.id === task.taskDefinition.id}
 				onOpen={handleOpenEditTaskSheet}
-			/>
+			/> */}
 		</>
 	);
 }

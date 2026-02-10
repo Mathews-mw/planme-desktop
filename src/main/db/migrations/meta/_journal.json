@@ -64,6 +64,13 @@
       "when": 1769214136688,
       "tag": "0008_faulty_odin",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1770422464227,
+      "tag": "0009_high_maggott",
+      "breakpoints": true
     }
   ]
 }
