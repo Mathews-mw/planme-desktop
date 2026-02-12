@@ -1,7 +1,5 @@
 import dayjs from 'dayjs';
 
-import { type IDateTime } from './create-task-sheet';
-
 import { Button } from '../ui/button';
 import {
 	DropdownMenu,
@@ -14,6 +12,8 @@ import {
 
 import { X } from 'lucide-react';
 import { IconAlarm, IconCalendarClock } from '@tabler/icons-react';
+import { IDateTime } from './create-task-form';
+import { buildReminderDateTime } from '../../utils/build-reminder-date-time';
 
 interface IProps {
 	dateTime: IDateTime | undefined;
@@ -81,17 +81,5 @@ export function ReminderDropdown({ dateTime, onRemoveDateTime, onShowReminderDia
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
-	);
-}
-
-function buildReminderDateTime(dateTime: NonNullable<IDateTime>) {
-	return new Date(
-		dateTime.date.getFullYear(),
-		dateTime.date.getMonth(),
-		dateTime.date.getDate(),
-		Number(dateTime.hour),
-		Number(dateTime.minute),
-		0,
-		0
 	);
 }

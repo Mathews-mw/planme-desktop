@@ -15,6 +15,7 @@ import {
 	ISaveTaskListRequest,
 	ITaskQuery,
 	IToggleTaskComplete,
+	IToggleTaskFavorite,
 } from '../shared/types/ipc';
 
 // Custom APIs for renderer
@@ -67,6 +68,9 @@ const api = {
 	},
 	toggleCompleteTask(data: IToggleTaskComplete): Promise<IpcResponse<null>> {
 		return ipcRenderer.invoke(IPC.TASKS.TOGGLE_COMPLETE, data);
+	},
+	toggleFavoriteTask(data: IToggleTaskFavorite): Promise<IpcResponse<null>> {
+		return ipcRenderer.invoke(IPC.TASKS.TOGGLE_FAVORITE, data);
 	},
 
 	// === Occurrences ===

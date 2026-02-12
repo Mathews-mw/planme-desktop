@@ -51,6 +51,9 @@ declare global {
 			toggleCompleteTask(
 				data: import('../shared/types/ipc').IToggleTaskComplete
 			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			toggleFavoriteTask(
+				data: import('../shared/types/ipc').IToggleTaskFavorite
+			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
 
 			// === Occurrences ===
 			listingOccurrences(

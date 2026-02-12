@@ -12,6 +12,7 @@ import './ipc/handles/task-list/index';
 import './ipc/handles/tasks/create-task-ipc';
 import './ipc/handles/tasks/listing-tasks-ipc';
 import './ipc/handles/tasks/toggle-complete-task-ipc';
+import './ipc/handles/tasks/toggle-favorite-task-ipc';
 
 // === Occurrences Imports ===
 import './ipc/handles/occurrences/listing-occurrences-ipc';

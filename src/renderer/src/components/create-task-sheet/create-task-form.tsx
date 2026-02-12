@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useLoadingBar } from 'react-top-loading-bar';
 
 import { queryClient } from '../../lib/query-client';
 import { useAuth } from '../../context/auth-context';
@@ -76,6 +77,7 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 	});
 
 	const { user } = useAuth();
+	const { start, complete } = useLoadingBar();
 
 	const [showReminderDialog, setShowReminderDialog] = useState(false);
 	const [showRecurrenceDialog, setShowRecurrenceDialog] = useState(false);
@@ -88,12 +90,14 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 	const { mutateAsync: createTaskFn, isPending } = useMutation({
 		mutationFn: taskRepository.create,
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['tasks'] });
+			queryClient.invalidateQueries({ queryKey: ['occurrences'] });
 		},
 	});
 
 	async function handleCreateTask(data: FormData) {
 		try {
+			start('continuous');
+
 			const result = await createTaskFn({
 				definition: {
 					userId: user?.id,
@@ -125,6 +129,7 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 
 			if (!result.success) {
 				errorHandler(result.error);
+				complete();
 				return;
 			}
 
@@ -137,6 +142,8 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 		} catch (criticalError) {
 			console.error('IPC Communication Crash:', criticalError);
 			toast.error('Critical communication error with the system.');
+		} finally {
+			complete();
 		}
 	}
 

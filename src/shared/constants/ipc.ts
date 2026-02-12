@@ -23,6 +23,7 @@ export const IPC = {
 		UPDATE: 'tasks:update',
 		DELETE: 'tasks:delete',
 		TOGGLE_COMPLETE: 'tasks:toggle_complete',
+		TOGGLE_FAVORITE: 'tasks:toggle_favorite',
 	},
 	OCCURRENCES: {
 		FETCH_ALL: 'occurrences:fetch_all',

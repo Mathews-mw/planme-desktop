@@ -85,6 +85,10 @@ export interface IToggleTaskComplete {
 	taskDefinitionId: string;
 }
 
+export interface IToggleTaskFavorite {
+	taskDefinitionId: string;
+}
+
 export type ISaveTaskRequest = ITask;
 
 // ===Response===

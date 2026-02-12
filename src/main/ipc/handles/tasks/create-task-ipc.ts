@@ -109,6 +109,7 @@ ipcMain.handle(IPC.TASKS.CREATE, async (_event, raw: ICreateTaskRequest): Promis
 		const task = TaskMapper.toDomain({
 			recurrenceRule,
 			taskDefinition,
+			occurrences: [],
 		});
 
 		if (generateOccurrences.length > 0) {

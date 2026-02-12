@@ -4,6 +4,7 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 
 import { useEffect } from 'react';
 import { RouterProvider } from 'react-router';
+import { LoadingBarContainer } from 'react-top-loading-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
@@ -12,9 +13,9 @@ import { queryClient } from './lib/query-client';
 import { Toaster } from './components/ui/sonner';
 import { runAuthBoot } from './boot/run-auth-boot';
 import { SplashScreen } from './components/splash-screen';
-import { ThemeProvider } from '~/src/renderer/src/providers/theme-provider';
 import { AuthProvider, useAuth } from './context/auth-context';
 import { BootErrorScreen } from './components/boot-error-screen';
+import { ThemeProvider } from '~/src/renderer/src/providers/theme-provider';
 import { BootManagerProvider, useBootManager } from './context/boot-manager-context';
 
 dayjs.extend(utc);
@@ -48,7 +49,9 @@ export function App(): React.JSX.Element {
 				<BootManagerProvider>
 					<AuthProvider>
 						<BootGate>
-							<RouterProvider router={router} />
+							<LoadingBarContainer props={{ color: '#6141d7', height: 3, loaderSpeed: 250 }}>
+								<RouterProvider router={router} />
+							</LoadingBarContainer>
 						</BootGate>
 					</AuthProvider>
 				</BootManagerProvider>

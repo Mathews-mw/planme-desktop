@@ -1,8 +1,6 @@
 import dayjs from 'dayjs';
 import { Fragment, useMemo } from 'react';
 
-import { type IRecurrenceData } from './create-task-sheet';
-
 import { Button } from '../ui/button';
 import {
 	DropdownMenu,
@@ -14,6 +12,8 @@ import {
 
 import { X } from 'lucide-react';
 import { IconCalendarRepeat, IconReload } from '@tabler/icons-react';
+import { IRecurrenceData } from './create-task-form';
+import { getRecurrenceLabel } from '../../utils/recurrence-utils';
 
 interface IProps {
 	recurrenceData: IRecurrenceData | undefined;
@@ -22,59 +22,19 @@ interface IProps {
 }
 
 export function RecurrenceDropdown({ recurrenceData, onRemoveRecurrence, onShowRecurrenceDialog }: IProps) {
-	const recurrenceLabel = useMemo((): { repetition: string; ends?: string } => {
-		let result: { repetition: string; ends?: string } = {
-			repetition: 'No recurrence',
-		};
-
+	const recurrenceLabel = useMemo(() => {
 		if (!recurrenceData) {
-			return result;
+			return { repetition: 'No recurrence' };
 		}
 
-		switch (recurrenceData.frequency) {
-			case 'DAILY_INTERVAL':
-				result = {
-					repetition: `Repeats every ${recurrenceData.interval ?? 1} day(s)`,
-				};
-				break;
-			case 'MONTHLY_DAY_OF_MONTH':
-				result = {
-					repetition: `Repeats each month on day ${recurrenceData.dayOfMonth}`,
-				};
-				break;
-			case 'WEEKLY_DAYS':
-				result = { repetition: `Repeats every week on selected days:` };
-				break;
-			case 'YEARLY_INTERVAL':
-				result = {
-					repetition: `Repeats every ${recurrenceData.interval ?? 1} year(s)`,
-				};
-				break;
-			case 'NONE':
-				result = { repetition: 'No recurrence' };
-				break;
-			default:
-				result = { repetition: 'No recurrence' };
-				break;
-		}
-
-		switch (recurrenceData.recurrenceEndType) {
-			case 'NEVER':
-				result = { ...result, ends: 'Never ends' };
-				break;
-			case 'AFTER_OCCURRENCES':
-				result = {
-					...result,
-					ends: `Ends after ${recurrenceData.maxOccurrences ?? 1} occurrences`,
-				};
-				break;
-			case 'ON_DATE':
-				result = {
-					...result,
-					ends: `Ends on ${dayjs(recurrenceData.endDate!).format('MMMM DD, YYYY')}`,
-				};
-				break;
-		}
+		const result = getRecurrenceLabel({
+			frequency: recurrenceData.frequency,
+			dayOfMonth: recurrenceData.dayOfMonth,
+			endDate: recurrenceData.endDate,
+			interval: recurrenceData.interval,
+			maxOccurrences: recurrenceData.maxOccurrences,
+			recurrenceEndType: recurrenceData.recurrenceEndType,
+		});
 
 		return result;
 	}, [recurrenceData]);

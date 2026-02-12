@@ -21,6 +21,7 @@ import {
 } from '@tabler/icons-react';
 
 import { Pen } from 'lucide-react';
+import { ToggleFavoriteTaskButton } from './toggle-favorite-task-button';
 
 interface IProps {
 	occurrence: ITaskOccurrenceDetails;
@@ -101,15 +102,7 @@ export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
 				</div>
 
 				<div>
-					<Button
-						size="icon"
-						variant="ghost"
-						onClick={(e) => {
-							e.stopPropagation();
-						}}
-					>
-						<IconStar />
-					</Button>
+					<ToggleFavoriteTaskButton taskDefinition={occurrence.taskDefinition} />
 
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
