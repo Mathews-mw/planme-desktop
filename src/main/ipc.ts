@@ -16,3 +16,11 @@ import './ipc/handles/tasks/toggle-favorite-task-ipc';
 
 // === Occurrences Imports ===
 import './ipc/handles/occurrences/listing-occurrences-ipc';
+
+// === Subtasks Imports ===
+import './ipc/handles/subtasks/create-subtask-ipc';
+import './ipc/handles/subtasks/edit-subtask-ipc';
+import './ipc/handles/subtasks/delete-subtask-ipc';
+import './ipc/handles/subtasks/toggle-subtask-complete-ipc';
+import './ipc/handles/subtasks/reorder-subtasks-ipc';
+import './ipc/handles/subtasks/listing-subtasks-ipc';

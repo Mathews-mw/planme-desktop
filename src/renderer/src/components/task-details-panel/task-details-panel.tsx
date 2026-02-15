@@ -1,12 +1,16 @@
 import dayjs from 'dayjs';
 import { Fragment } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { toWeekdayObjects } from '../../utils/weekdays-utils';
 import { getRecurrenceLabel } from '../../utils/recurrence-utils';
 import { buildReminderDateTime } from '../../utils/build-reminder-date-time';
 import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
+import { subtaskRepository } from '~/src/renderer/repositories/subtasks-repository';
 
 import { Button } from '../ui/button';
+import { Separator } from '../ui/separator';
+import { SubtaskList } from './subtask-list';
 import { TaskPriorityBadge } from '../task-priority-badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 
@@ -18,6 +22,7 @@ import {
 	IconStar,
 	IconTrash,
 } from '@tabler/icons-react';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface IProps {
 	open: boolean;
@@ -26,31 +31,37 @@ interface IProps {
 }
 
 export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
+	const { data: subtasksResponse } = useQuery({
+		queryKey: ['subtasks', occurrence?.taskDefinitionId],
+		queryFn: () => subtaskRepository.listing({ taskDefinitionId: occurrence?.taskDefinitionId ?? '' }),
+		enabled: !!occurrence && open,
+	});
+
 	const reminderDt = occurrence
 		? buildReminderDateTime({
-			date: occurrence.occurrenceDateTime,
-			hour: occurrence.occurrenceDateTime.getHours().toString(),
-			minute: occurrence.occurrenceDateTime.getMinutes().toString(),
-		})
+				date: occurrence.occurrenceDateTime,
+				hour: occurrence.occurrenceDateTime.getHours().toString(),
+				minute: occurrence.occurrenceDateTime.getMinutes().toString(),
+			})
 		: null;
 	const timeLabel = reminderDt ? dayjs(reminderDt).format('h:mm A') : '';
 	const dateLabel = reminderDt ? dayjs(reminderDt).format('MMMM D, YYYY') : '';
 
 	const recurrenceLabel = occurrence
 		? getRecurrenceLabel({
-			frequency: occurrence.taskDefinition.recurrenceRule.frequency,
-			dayOfMonth: occurrence.taskDefinition.recurrenceRule.dayOfMonth,
-			endDate: occurrence.taskDefinition.recurrenceRule.endDate,
-			interval: occurrence.taskDefinition.recurrenceRule.interval,
-			maxOccurrences: occurrence.taskDefinition.recurrenceRule.maxOccurrences,
-			recurrenceEndType: occurrence.taskDefinition.recurrenceRule.endType,
-		})
+				frequency: occurrence.taskDefinition.recurrenceRule.frequency,
+				dayOfMonth: occurrence.taskDefinition.recurrenceRule.dayOfMonth,
+				endDate: occurrence.taskDefinition.recurrenceRule.endDate,
+				interval: occurrence.taskDefinition.recurrenceRule.interval,
+				maxOccurrences: occurrence.taskDefinition.recurrenceRule.maxOccurrences,
+				recurrenceEndType: occurrence.taskDefinition.recurrenceRule.endType,
+			})
 		: { repetition: 'No recurrence' };
 
 	const weekdaysLabel =
 		occurrence &&
-			occurrence.taskDefinition.recurrenceRule.weekdays &&
-			occurrence.taskDefinition.recurrenceRule.weekdays.length > 0
+		occurrence.taskDefinition.recurrenceRule.weekdays &&
+		occurrence.taskDefinition.recurrenceRule.weekdays.length > 0
 			? toWeekdayObjects(occurrence.taskDefinition.recurrenceRule.weekdays)
 			: null;
 
@@ -66,7 +77,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 						<SheetTitle>{occurrence.taskDefinition.title}</SheetTitle>
 					</SheetHeader>
 
-					<div className="flex-1 overflow-auto p-4">
+					<ScrollArea className="flex-1 overflow-auto p-4">
 						<div className="space-y-4">
 							<div className="flex w-full items-center justify-between">
 								<TaskPriorityBadge priority={occurrence.taskDefinition.priority} />
@@ -119,6 +130,11 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 								</div>
 							)}
 
+							<SubtaskList
+								taskDefinitionId={occurrence.taskDefinitionId}
+								subtasks={subtasksResponse && subtasksResponse.success ? subtasksResponse.data : []}
+							/>
+
 							{occurrence.taskDefinition.description && (
 								<div className="space-y-2 rounded border bg-background p-2">
 									<div className="flex items-center gap-2">
@@ -130,7 +146,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 								</div>
 							)}
 						</div>
-					</div>
+					</ScrollArea>
 
 					<div className="flex w-full items-center justify-between border-t p-2">
 						<span className="text-sm text-muted-foreground">

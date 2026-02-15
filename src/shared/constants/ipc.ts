@@ -34,5 +34,7 @@ export const IPC = {
 		CREATE: 'subtasks:create',
 		UPDATE: 'subtasks:update',
 		DELETE: 'subtasks:delete',
+		REORDER: 'subtasks:reorder',
+		TOGGLE_COMPLETE: 'subtasks:toggle_complete',
 	},
 } as const;

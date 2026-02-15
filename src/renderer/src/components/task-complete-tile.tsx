@@ -1,19 +1,18 @@
-import { useMemo, useState } from 'react';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
-import { type ITask } from '~/src/shared/types/task';
+import { queryClient } from '../lib/query-client';
+import { taskRepository } from '../../repositories/tasks-repository';
 
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { EditTaskSheet } from './edit-task-sheet/edit-task-sheet';
+import { ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 import { Pen } from 'lucide-react';
 import { IconDotsVertical, IconNote, IconPointFilled, IconRefresh, IconStar } from '@tabler/icons-react';
-import { useMutation } from '@tanstack/react-query';
-import { taskRepository } from '../../repositories/tasks-repository';
-import { queryClient } from '../lib/query-client';
-import { ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
-import dayjs from 'dayjs';
 
 interface IProps {
 	occurrence: ITaskOccurrenceDetails;
@@ -25,7 +24,10 @@ export function TaskCompleteTile({ occurrence, isActive, onOpenDetails }: IProps
 	const [openEditTaskSheet, setOpenEditTaskSheet] = useState(false);
 	const [selectedTask, setSelectedTask] = useState<ITaskOccurrenceDetails | undefined>(undefined);
 
-	const { mutateAsync: toggleCompleteFn, isPending } = useMutation({
+	const subtasks = occurrence.taskDefinition.subtasks;
+	const completedSubtasks = subtasks.filter((subtask) => subtask.completedAt !== null);
+
+	const { mutateAsync: toggleCompleteFn } = useMutation({
 		mutationFn: taskRepository.toggleComplete,
 		onSuccess: async () => {
 			queryClient.invalidateQueries({ queryKey: ['occurrences'] });
@@ -74,10 +76,12 @@ export function TaskCompleteTile({ occurrence, isActive, onOpenDetails }: IProps
 							<IconPointFilled className="size-4 text-muted-foreground" />
 						</div>
 
-						{occurrence.taskDefinition.subtasks && occurrence.taskDefinition.subtasks.length > 0 && (
+						{subtasks.length > 0 && (
 							<div className="flex items-center gap-1">
 								<div className="text-sm text-muted-foreground">
-									<span>2 de 5</span>
+									<span>
+										{completedSubtasks.length} de {subtasks.length}
+									</span>
 								</div>
 
 								<IconPointFilled className="size-4 text-muted-foreground" />

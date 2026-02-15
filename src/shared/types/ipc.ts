@@ -1,12 +1,13 @@
 import { ITask } from './task';
+import { ITaskStatus } from './task-occurrence';
 import { ITaskPriority } from './task-definition';
 import { IRecurrenceEndType, IRecurrenceFrequency } from './recurrence-rule';
-import { ITaskStatus } from './task-occurrence';
 
 // ===IPC Errors ===
 
 export type IpcErrorCode =
 	| 'VALIDATION_ERROR'
+	| 'BAD_REQUEST_ERROR'
 	| 'NOT_FOUND'
 	| 'CONFLICT'
 	| 'UNAUTHORIZED'
@@ -80,6 +81,8 @@ export interface ICreateTaskRequest {
 	};
 }
 
+export type ISaveTaskRequest = ITask;
+
 export interface IToggleTaskComplete {
 	occurrenceId: string;
 	taskDefinitionId: string;
@@ -89,7 +92,35 @@ export interface IToggleTaskFavorite {
 	taskDefinitionId: string;
 }
 
-export type ISaveTaskRequest = ITask;
+export interface ICreateSubtaskRequest {
+	taskDefinitionId: string;
+	title: string;
+	description?: string | null;
+	position?: number;
+}
+
+export interface IUpdateSubtaskRequest {
+	subtaskId: string;
+	title?: string;
+	description?: string | null;
+}
+
+export interface IDeleteSubtaskRequest {
+	subtaskId: string;
+}
+
+export interface IToggleCompleteSubtaskRequest {
+	subtaskId: string;
+}
+
+export interface IReorderSubtasksRequest {
+	taskDefinitionId: string;
+	orderedSubtaskIds: Array<string>;
+}
+
+export interface IListingSubtasksQuery {
+	taskDefinitionId: string;
+}
 
 // ===Response===
 

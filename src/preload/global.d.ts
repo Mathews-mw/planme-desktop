@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
+import { ISubtask } from '../shared/types/subtask';
 
 export {};
 
@@ -61,6 +62,26 @@ declare global {
 			): Promise<
 				import('../shared/types/ipc').IpcResponse<import('../shared/types/task-occurrence').ITaskOccurrenceDetails[]>
 			>;
+
+			// === Subtasks ===
+			createSubtask(
+				data: import('../shared/types/ipc').ICreateSubtaskRequest
+			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/subtask').ISubtask>>;
+			updateSubtask(
+				data: import('../shared/types/ipc').IUpdateSubtaskRequest
+			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/subtask').ISubtask>>;
+			deleteSubtask(
+				data: import('../shared/types/ipc').IDeleteSubtaskRequest
+			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			toggleCompleteSubtask(
+				data: import('../shared/types/ipc').IToggleCompleteSubtaskRequest
+			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			reorderSubtask(
+				data: import('../shared/types/ipc').IReorderSubtasksRequest
+			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			listingSubtask(
+				data: import('../shared/types/ipc').IListingSubtasksQuery
+			): Promise<import('../shared/types/ipc').IpcResponse<ISubtask[]>>;
 		};
 	}
 }

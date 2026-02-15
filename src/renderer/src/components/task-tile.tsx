@@ -10,18 +10,11 @@ import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence'
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { EditTaskSheet } from './edit-task-sheet/edit-task-sheet';
+import { ToggleFavoriteTaskButton } from './toggle-favorite-task-button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
-import {
-	IconCalendarTime,
-	IconDotsVertical,
-	IconNote,
-	IconPointFilled,
-	IconRefresh,
-	IconStar,
-} from '@tabler/icons-react';
 
 import { Pen } from 'lucide-react';
-import { ToggleFavoriteTaskButton } from './toggle-favorite-task-button';
+import { IconCalendarTime, IconDotsVertical, IconNote, IconPointFilled, IconRefresh } from '@tabler/icons-react';
 
 interface IProps {
 	occurrence: ITaskOccurrenceDetails;
@@ -33,7 +26,10 @@ export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
 	const [openEditTaskSheet, setOpenEditTaskSheet] = useState(false);
 	const [selectedOccurrence, setSelectedOccurrence] = useState<ITaskOccurrenceDetails | undefined>(undefined);
 
-	const { mutateAsync: toggleCompleteFn, isPending } = useMutation({
+	const subtasks = occurrence.taskDefinition.subtasks;
+	const completedSubtasks = subtasks.filter((subtask) => subtask.completedAt !== null);
+
+	const { mutateAsync: toggleCompleteFn } = useMutation({
 		mutationFn: taskRepository.toggleComplete,
 		onSuccess: async () => {
 			queryClient.invalidateQueries({ queryKey: ['occurrences'] });
@@ -69,16 +65,6 @@ export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
 					<span className="text-lg font-semibold">{occurrence.taskDefinition.title}</span>
 
 					<div className="flex items-center gap-1">
-						{occurrence.taskDefinition.subtasks && occurrence.taskDefinition.subtasks.length > 0 && (
-							<div className="flex items-center gap-1">
-								<div className="text-sm text-muted-foreground">
-									<span>2 de 5</span>
-								</div>
-
-								<IconPointFilled className="size-4 text-muted-foreground" />
-							</div>
-						)}
-
 						<div className="flex items-center gap-1">
 							<div className="flex items-center gap-1">
 								<IconCalendarTime className="size-4 text-muted-foreground" />
@@ -88,6 +74,18 @@ export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
 							</div>
 							<IconPointFilled className="size-4 text-muted-foreground" />
 						</div>
+
+						{subtasks.length > 0 && (
+							<div className="flex items-center gap-1">
+								<div className="text-sm text-muted-foreground">
+									<span>
+										{completedSubtasks.length} de {subtasks.length}
+									</span>
+								</div>
+
+								<IconPointFilled className="size-4 text-muted-foreground" />
+							</div>
+						)}
 
 						{occurrence.taskDefinition.recurrenceRule.frequency !== 'NONE' &&
 							occurrence.taskDefinition.recurrenceRule.endType !== 'ONCE' && (
