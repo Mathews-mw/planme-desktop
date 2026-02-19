@@ -110,12 +110,12 @@ export function CreateTaskForm({ taskList, onClose }: IProps) {
 				recurrenceRule: {
 					startDateTime: dateTime
 						? new Date(
-							dateTime.date.getFullYear(),
-							dateTime.date.getMonth(),
-							dateTime.date.getDate(),
-							parseInt(dateTime.hour),
-							parseInt(dateTime.minute)
-						)
+								dateTime.date.getFullYear(),
+								dateTime.date.getMonth(),
+								dateTime.date.getDate(),
+								parseInt(dateTime.hour),
+								parseInt(dateTime.minute)
+							)
 						: null,
 					frequency: recurrence ? recurrence.frequency : undefined,
 					endType: recurrence ? recurrence.recurrenceEndType : undefined,

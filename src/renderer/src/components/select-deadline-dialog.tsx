@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { Button } from '../ui/button';
-import { Calendar } from '../ui/calendar';
+import { Button } from './ui/button';
+import { Calendar } from './ui/calendar';
 import {
 	Dialog,
 	DialogClose,
@@ -10,16 +10,17 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from '../ui/dialog';
+} from './ui/dialog';
 
 interface IProps {
 	openDialog: boolean;
 	onOpenDialog: (open: boolean) => void;
 	onPickDate: (date: Date) => void;
+	defaultOptions?: Date;
 }
 
-export function PickDeadlineDialog({ openDialog, onOpenDialog, onPickDate }: IProps) {
-	const [date, setDate] = useState<Date | undefined>(new Date());
+export function SelectDeadlineDialog({ openDialog, onOpenDialog, onPickDate, defaultOptions }: IProps) {
+	const [date, setDate] = useState<Date | undefined>(defaultOptions ?? new Date());
 
 	function handlePickDateTime() {
 		if (!date) {

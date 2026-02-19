@@ -15,7 +15,7 @@ export type ITaskStatus = z.infer<typeof taskStatusSchema>;
 export interface ITaskOccurrence {
 	id: string;
 	taskDefinitionId: string;
-	occurrenceDateTime: Date;
+	occurrenceDateTime?: Date | null;
 	status: ITaskStatus;
 	note?: string | null;
 	completedAt?: Date | null;

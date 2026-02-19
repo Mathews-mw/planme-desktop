@@ -9,14 +9,16 @@ import { taskRepository } from '../../repositories/tasks-repository';
 import { ITaskDefinition } from '~/src/shared/types/task-definition';
 
 import { Button } from './ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 import { IconStar } from '@tabler/icons-react';
 
 interface IProps {
 	taskDefinition: ITaskDefinition;
+	postAction?: () => void;
 }
 
-export function ToggleFavoriteTaskButton({ taskDefinition }: IProps) {
+export function ToggleFavoriteTaskButton({ taskDefinition, postAction }: IProps) {
 	const { start, complete } = useLoadingBar();
 
 	const { mutateAsync: toggleFavoriteTaskFn } = useMutation({
@@ -33,6 +35,7 @@ export function ToggleFavoriteTaskButton({ taskDefinition }: IProps) {
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ['occurrences'] });
 			complete();
+			postAction?.();
 		},
 		onError: (error) => {
 			complete();
@@ -42,23 +45,30 @@ export function ToggleFavoriteTaskButton({ taskDefinition }: IProps) {
 	});
 
 	return (
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			data-favorite={taskDefinition.isStarred}
-			onClick={async (e) => {
-				e.preventDefault();
-				e.stopPropagation();
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<Button
+					variant="ghost"
+					size="icon-sm"
+					data-favorite={taskDefinition.isStarred}
+					onClick={async (e) => {
+						e.preventDefault();
+						e.stopPropagation();
 
-				await toggleFavoriteTaskFn();
-			}}
-		>
-			<IconStar
-				className={cn(
-					'size text-muted-foreground transition-all duration-200',
-					taskDefinition.isStarred && 'fill-primary text-primary'
-				)}
-			/>
-		</Button>
+						await toggleFavoriteTaskFn();
+					}}
+				>
+					<IconStar
+						className={cn(
+							'size text-muted-foreground transition-all duration-200',
+							taskDefinition.isStarred && 'fill-primary text-primary'
+						)}
+					/>
+				</Button>
+			</TooltipTrigger>
+			<TooltipContent>
+				<p>{taskDefinition.isStarred ? 'Remove from favorites' : 'Mark as favorite'}</p>
+			</TooltipContent>
+		</Tooltip>
 	);
 }

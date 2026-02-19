@@ -13,11 +13,12 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(objectSupport);
 
-// dayjs.tz.setDefault('America/Sao_Paulo');
-
 interface IGenerateOccurrencesRequest {
 	rule: IRecurrenceRule;
 	fromDate: Date;
+	/**
+	 * Data máxima a considerar para gerar ocorrências. Se a próxima ocorrência for depois dessa data, a função para de gerar e retorna o que já gerou até então.
+	 */
 	untilDate?: Date;
 	/**
 	 * Defini uma quantidade máxima de ocorrências que a função vai gerar. Default = 1
@@ -39,6 +40,7 @@ interface IGenerateOccurrencesRequest {
 export function generateOccurrences({
 	rule,
 	fromDate,
+	untilDate,
 	maxToGenerate = 1,
 	alreadyGeneratedCount = 0,
 }: IGenerateOccurrencesRequest): Array<Date> {
@@ -72,6 +74,10 @@ export function generateOccurrences({
 		const nextOcc = _nextOccurrence(rule, dateRef);
 
 		if (!nextOcc) {
+			break;
+		}
+
+		if (untilDate && nextOcc.getTime() > untilDate.getTime()) {
 			break;
 		}
 

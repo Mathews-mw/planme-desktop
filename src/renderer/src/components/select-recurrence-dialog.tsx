@@ -3,15 +3,16 @@ import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 
-import { IRecurrenceData } from './edit-task-form';
+import { toWeekdayObjects, weekDays } from '../utils/weekdays-utils';
+import { IRecurrenceEndType, IRecurrenceFrequency } from '~/src/shared/types/recurrence-rule';
 
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
-import { Separator } from '../ui/separator';
-import { DatePicker } from '../date-picker';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { Separator } from './ui/separator';
+import { DatePicker } from './date-picker';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import {
 	Dialog,
 	DialogClose,
@@ -20,14 +21,23 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from '../ui/dialog';
-import { toWeekdayObjects, weekDays } from '../../utils/weekdays-utils';
+} from './ui/dialog';
+
+export interface ISelectRecurrenceData {
+	frequency: IRecurrenceFrequency;
+	interval?: number;
+	dayOfMonth?: number;
+	weekdays?: Array<{ value: number; label: string }>;
+	recurrenceEndType?: IRecurrenceEndType;
+	endDate?: Date;
+	maxOccurrences?: number;
+}
 
 interface IProps {
 	openDialog: boolean;
 	onOpenDialog: (open: boolean) => void;
-	onSetRecurrence: (data: IRecurrenceData) => void;
-	defaultOptions?: IRecurrenceData;
+	onSaveRecurrence: (data: ISelectRecurrenceData) => Promise<void>;
+	defaultOptions?: ISelectRecurrenceData;
 }
 
 function toggleNumberInArray(arr: number[], value: number) {
@@ -42,7 +52,7 @@ const formSchema = z
 		interval: z.coerce.number().int().min(1, { message: 'Interval must be >= 1' }).default(1),
 		dayOfMonth: z.coerce.number().int().min(1).max(31).default(1),
 		weekdaysSelected: z.array(z.coerce.number().int()).default([]),
-		recurrenceEndType: z.enum(['NEVER', 'ON_DATE', 'AFTER_OCCURRENCES']).default('NEVER'),
+		recurrenceEndType: z.enum(['NEVER', 'ONCE', 'ON_DATE', 'AFTER_OCCURRENCES']).default('NEVER'),
 		endDate: z.coerce.date().nullable().default(null),
 		maxOccurrences: z.coerce.number().int().min(1, { message: 'Must be >= 1' }).nullable().default(null),
 	})
@@ -109,7 +119,7 @@ const formSchema = z
 type FormInputData = z.input<typeof formSchema>;
 type FormOutputData = z.output<typeof formSchema>; // = z.infer<typeof formSchema>
 
-export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onSetRecurrence }: IProps) {
+export function SelectRecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onSaveRecurrence }: IProps) {
 	const {
 		control,
 		register,
@@ -120,13 +130,13 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 	} = useForm<FormInputData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			frequency: 'NONE',
-			interval: 1,
-			dayOfMonth: 1,
-			weekdaysSelected: [],
-			recurrenceEndType: 'NEVER',
-			endDate: null,
-			maxOccurrences: null,
+			frequency: defaultOptions?.frequency ?? 'NONE',
+			interval: defaultOptions?.interval ?? 1,
+			dayOfMonth: defaultOptions?.dayOfMonth ?? 1,
+			weekdaysSelected: defaultOptions?.weekdays ? defaultOptions.weekdays.map((w) => w.value) : [],
+			recurrenceEndType: defaultOptions?.recurrenceEndType ?? 'NEVER',
+			endDate: defaultOptions?.endDate ?? null,
+			maxOccurrences: defaultOptions?.maxOccurrences ?? null,
 		},
 	});
 
@@ -145,10 +155,10 @@ export function RecurrenceDialog({ onOpenDialog, openDialog, defaultOptions, onS
 		setValue('weekdaysSelected', next, { shouldValidate: true });
 	}
 
-	function handleSetRecurrence(data: FormInputData) {
+	async function handleSetRecurrence(data: FormInputData) {
 		const parsedData: FormOutputData = formSchema.parse(data);
 
-		onSetRecurrence({
+		await onSaveRecurrence({
 			frequency: parsedData.frequency,
 			interval:
 				parsedData.frequency === 'DAILY_INTERVAL' || parsedData.frequency === 'YEARLY_INTERVAL'

@@ -23,6 +23,7 @@ import {
 	IToggleTaskComplete,
 	IToggleTaskFavorite,
 	IUpdateSubtaskRequest,
+	IUpdateTaskRequest,
 } from '../shared/types/ipc';
 
 // Custom APIs for renderer
@@ -69,6 +70,9 @@ const api = {
 	// === Tasks ===
 	createTask(data: ICreateTaskRequest): Promise<IpcResponse<ITask>> {
 		return ipcRenderer.invoke(IPC.TASKS.CREATE, data);
+	},
+	updateTask(data: IUpdateTaskRequest): Promise<IpcResponse<null>> {
+		return ipcRenderer.invoke(IPC.TASKS.UPDATE, data);
 	},
 	listingTasks(query: ITaskQuery): Promise<IpcResponse<ITask[]>> {
 		return ipcRenderer.invoke(IPC.TASKS.FETCH_ALL, query);

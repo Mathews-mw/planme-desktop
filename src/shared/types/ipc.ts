@@ -52,6 +52,7 @@ export interface ISaveTaskListRequest {
 export interface ITaskQuery {
 	search?: string;
 	status?: ITaskStatus;
+	overdueDateOnly?: boolean;
 }
 
 export interface IOccurrencesQuery {
@@ -70,6 +71,25 @@ export interface ICreateTaskRequest {
 		deadline?: Date | null;
 	};
 	recurrenceRule: {
+		frequency?: IRecurrenceFrequency;
+		endType?: IRecurrenceEndType;
+		startDateTime?: Date | null;
+		endDate?: Date | null;
+		interval?: number | null;
+		weekdays?: Array<number> | null;
+		dayOfMonth?: number | null;
+		maxOccurrences?: number | null;
+	};
+}
+
+export interface IUpdateTaskRequest {
+	taskDefinitionId: string;
+	listSlug?: string;
+	title?: string;
+	description?: string | null;
+	priority?: ITaskPriority;
+	deadline?: Date | null;
+	recurrenceRule?: {
 		frequency?: IRecurrenceFrequency;
 		endType?: IRecurrenceEndType;
 		startDateTime?: Date | null;

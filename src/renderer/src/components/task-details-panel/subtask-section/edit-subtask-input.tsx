@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../../lib/utils';
 import { ISubtask } from '~/src/shared/types/subtask';
 
 interface IProps {
@@ -9,7 +9,7 @@ interface IProps {
 	onHandleUpdate: (data: { subtaskId: string; title: string }) => Promise<void>;
 }
 
-export function EditTaskInput({ subtask, isPending, onHandleUpdate }: IProps) {
+export function EditSubtaskInput({ subtask, isPending, onHandleUpdate }: IProps) {
 	const [inputValue, setInputValue] = useState(subtask.title);
 	const [enableEditInput, setEnableEditInput] = useState(false);
 

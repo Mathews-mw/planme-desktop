@@ -111,6 +111,25 @@
 	--color-sidebar-ring: var(--sidebar-ring);
 }
 
+@keyframes ripple {
+  from {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+.btn-ripple {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  background-color: currentColor;
+  animation: ripple 550ms ease-out;
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

@@ -1,11 +1,9 @@
 import { useState } from 'react';
 
-import { type IDateTime } from './edit-task-sheet';
-
-import { Button } from '../ui/button';
-import { Calendar } from '../ui/calendar';
-import { TimePicker } from '../time-picker';
-import { Separator } from '../ui/separator';
+import { Button } from './ui/button';
+import { Calendar } from './ui/calendar';
+import { TimePicker } from './time-picker';
+import { Separator } from './ui/separator';
 import {
 	Dialog,
 	DialogClose,
@@ -14,17 +12,26 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from '../ui/dialog';
+} from './ui/dialog';
+
+export interface IDateTime {
+	date: Date;
+	hour: string;
+	minute: string;
+}
 
 interface IProps {
 	openDialog: boolean;
 	onOpenDialog: (open: boolean) => void;
 	onPickDateTime: (dateTime: IDateTime) => void;
+	defaultOptions?: IDateTime;
 }
 
-export function ReminderDialog({ openDialog, onOpenDialog, onPickDateTime }: IProps) {
-	const [date, setDate] = useState<Date | undefined>(new Date());
-	const [time, setTime] = useState<{ hour: string; minute: string } | undefined>(undefined);
+export function SelectReminderDialog({ openDialog, onOpenDialog, onPickDateTime, defaultOptions }: IProps) {
+	const [date, setDate] = useState<Date | undefined>(defaultOptions?.date || new Date());
+	const [time, setTime] = useState<{ hour: string; minute: string } | undefined>(
+		defaultOptions ? { hour: defaultOptions.hour, minute: defaultOptions.minute } : undefined
+	);
 
 	function handlePickDateTime() {
 		if (!date || !time) {
@@ -61,8 +68,8 @@ export function ReminderDialog({ openDialog, onOpenDialog, onPickDateTime }: IPr
 					<Separator />
 
 					<TimePicker
-						defaultHour={new Date().getHours().toString()}
-						defaultMinute={new Date().getMinutes().toString()}
+						defaultHour={defaultOptions?.hour ?? new Date().getHours().toString()}
+						defaultMinute={defaultOptions?.minute ?? new Date().getMinutes().toString()}
 						onPickTime={(time) => setTime(time)}
 					/>
 				</div>

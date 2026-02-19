@@ -7,7 +7,6 @@ import { taskRepository } from '../../repositories/tasks-repository';
 
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
-import { EditTaskSheet } from './edit-task-sheet/edit-task-sheet';
 import { ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 

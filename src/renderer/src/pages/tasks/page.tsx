@@ -36,6 +36,8 @@ export function TasksPage() {
 		return group;
 	}, [occsResponse, now]);
 
+	console.log('groups: ', groups);
+
 	function openDetails(occurrence?: ITaskOccurrenceDetails) {
 		console.log('open occurrence details: ', occurrence);
 

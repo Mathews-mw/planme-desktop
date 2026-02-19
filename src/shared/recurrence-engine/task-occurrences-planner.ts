@@ -6,6 +6,7 @@ import { generateOccurrences } from './recurrence-generator';
 interface IGenerateInitialOccurrencesRequest {
 	rule: IRecurrenceRule;
 	fromDate: Date; // normalmente agora, ou rule.startDateTime
+	untilDate?: Date;
 	horizonDays: number; // p.ex. 60 dias pra frente
 	limit?: number;
 }
@@ -14,6 +15,7 @@ export class TaskOccurrencesPlanner {
 	static generateInitialOccurrences({
 		rule,
 		fromDate,
+		untilDate,
 		horizonDays,
 		limit,
 	}: IGenerateInitialOccurrencesRequest): Date[] {
@@ -24,6 +26,7 @@ export class TaskOccurrencesPlanner {
 		const occurrences = generateOccurrences({
 			rule,
 			fromDate,
+			untilDate,
 			maxToGenerate,
 		}).filter((d) => d <= toDate);
 

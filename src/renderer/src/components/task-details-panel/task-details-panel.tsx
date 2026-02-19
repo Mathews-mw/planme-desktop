@@ -1,28 +1,38 @@
 import dayjs from 'dayjs';
-import { Fragment } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Fragment, useState } from 'react';
+import { useLoadingBar } from 'react-top-loading-bar';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
+import { queryClient } from '../../lib/query-client';
+import { IUpdateTaskRequest } from '~/src/shared/types/ipc';
 import { toWeekdayObjects } from '../../utils/weekdays-utils';
 import { getRecurrenceLabel } from '../../utils/recurrence-utils';
+import { errorHandler } from '../../_api/error-handler/error-handler';
 import { buildReminderDateTime } from '../../utils/build-reminder-date-time';
+import { taskRepository } from '~/src/renderer/repositories/tasks-repository';
 import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
 import { subtaskRepository } from '~/src/renderer/repositories/subtasks-repository';
 
 import { Button } from '../ui/button';
-import { Separator } from '../ui/separator';
-import { SubtaskList } from './subtask-list';
+import { Checkbox } from '../ui/checkbox';
+import { ScrollArea } from '../ui/scroll-area';
+import { TaskTitleInput } from './task-title-input';
 import { TaskPriorityBadge } from '../task-priority-badge';
+import { SubtaskList } from './subtask-section/subtask-list';
+import { TaskDescriptionInput } from './task-description-input';
+import { SelectReminderDialog } from '../select-reminder-dialog';
+import { SelectDeadlineDialog } from '../select-deadline-dialog';
+import { SelectRecurrenceDialog } from '../select-recurrence-dialog';
+import { ToggleFavoriteTaskButton } from '../toggle-favorite-task-button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 
-import {
-	IconCalendarCheck,
-	IconCalendarRepeat,
-	IconCalendarTime,
-	IconNote,
-	IconStar,
-	IconTrash,
-} from '@tabler/icons-react';
-import { ScrollArea } from '../ui/scroll-area';
+import { IconCalendarCheck, IconCalendarRepeat, IconCalendarTime, IconNote, IconTrash } from '@tabler/icons-react';
+import { Separator } from '../ui/separator';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { taskListRepository } from '~/src/renderer/repositories/task-list-repository';
+import { MoveToListSelect } from './move-to-list-select';
 
 interface IProps {
 	open: boolean;
@@ -31,19 +41,33 @@ interface IProps {
 }
 
 export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
+	const [showReminderDialog, setShowReminderDialog] = useState(false);
+	const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
+	const [showRecurrenceDialog, setShowRecurrenceDialog] = useState(false);
+
+	const { start, complete } = useLoadingBar();
+
 	const { data: subtasksResponse } = useQuery({
 		queryKey: ['subtasks', occurrence?.taskDefinitionId],
 		queryFn: () => subtaskRepository.listing({ taskDefinitionId: occurrence?.taskDefinitionId ?? '' }),
 		enabled: !!occurrence && open,
 	});
 
-	const reminderDt = occurrence
-		? buildReminderDateTime({
-				date: occurrence.occurrenceDateTime,
-				hour: occurrence.occurrenceDateTime.getHours().toString(),
-				minute: occurrence.occurrenceDateTime.getMinutes().toString(),
-			})
-		: null;
+	const { data: taskListResponse } = useQuery({
+		queryKey: ['task-list', 'edit-task-sheet'],
+		queryFn: taskListRepository.listingAll,
+		refetchOnWindowFocus: false,
+		enabled: open,
+	});
+
+	const reminderDt =
+		occurrence && occurrence.occurrenceDateTime
+			? buildReminderDateTime({
+					date: occurrence.occurrenceDateTime,
+					hour: occurrence.occurrenceDateTime.getHours().toString(),
+					minute: occurrence.occurrenceDateTime.getMinutes().toString(),
+				})
+			: null;
 	const timeLabel = reminderDt ? dayjs(reminderDt).format('h:mm A') : '';
 	const dateLabel = reminderDt ? dayjs(reminderDt).format('MMMM D, YYYY') : '';
 
@@ -65,6 +89,73 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 			? toWeekdayObjects(occurrence.taskDefinition.recurrenceRule.weekdays)
 			: null;
 
+	const { mutateAsync: updateFn, isPending: isPendingUpdate } = useMutation({
+		mutationFn: taskRepository.update,
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ['occurrences'] });
+		},
+	});
+
+	const { mutateAsync: toggleCompleteFn, isPending: isPendingComplete } = useMutation({
+		mutationFn: taskRepository.toggleComplete,
+		onSuccess: async () => {
+			queryClient.invalidateQueries({ queryKey: ['occurrences'] });
+		},
+	});
+
+	async function handleUpdateTask(data: IUpdateTaskRequest) {
+		if (!occurrence) {
+			return;
+		}
+
+		try {
+			start('continuous');
+
+			const result = await updateFn(data);
+
+			if (!result.success) {
+				errorHandler(result.error);
+				complete();
+				return;
+			}
+
+			complete();
+			onOpenChange(false);
+		} catch (criticalError) {
+			complete();
+			console.error('IPC Communication Crash:', criticalError);
+			toast.error('Critical communication error with the system.');
+		}
+	}
+
+	async function handleToggleComplete() {
+		if (!occurrence) {
+			return;
+		}
+
+		try {
+			start('continuous');
+
+			const result = await toggleCompleteFn({
+				taskDefinitionId: occurrence.taskDefinitionId,
+				occurrenceId: occurrence.id,
+			});
+
+			if (!result.success) {
+				errorHandler(result.error);
+				complete();
+				return;
+			}
+
+			complete();
+			onOpenChange(false);
+		} catch (criticalError) {
+			complete();
+			console.error('IPC Communication Crash:', criticalError);
+			toast.error('Critical communication error with the system.');
+		}
+	}
+
 	if (!occurrence) {
 		return null;
 	}
@@ -74,7 +165,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 			<SheetContent side="right" className="w-105 p-0 sm:w-120">
 				<div className="flex h-full flex-col">
 					<SheetHeader className="border-b p-4">
-						<SheetTitle>{occurrence.taskDefinition.title}</SheetTitle>
+						<SheetTitle className="text-muted-foreground">Task details</SheetTitle>
 					</SheetHeader>
 
 					<ScrollArea className="flex-1 overflow-auto p-4">
@@ -82,68 +173,200 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 							<div className="flex w-full items-center justify-between">
 								<TaskPriorityBadge priority={occurrence.taskDefinition.priority} />
 
-								<Button variant="ghost" size="icon-sm">
-									<IconStar className="size-5 text-muted-foreground" />
+								<ToggleFavoriteTaskButton
+									taskDefinition={occurrence.taskDefinition}
+									postAction={() => onOpenChange(false)}
+								/>
+							</div>
+
+							{/* Title Section */}
+							<div className="rounded-md border bg-background px-4 py-2 shadow-xs dark:border-input dark:bg-input/30">
+								<div className="flex items-center gap-2">
+									<Checkbox
+										checked={occurrence.status === 'COMPLETED'}
+										disabled={isPendingComplete}
+										onCheckedChange={() => handleToggleComplete()}
+									/>
+									<TaskTitleInput
+										occurrence={occurrence}
+										onHandleUpdate={handleUpdateTask}
+										isPending={isPendingUpdate}
+									/>
+								</div>
+							</div>
+
+							{/* Reminder Section */}
+							<div>
+								<Button
+									variant="outline"
+									className="flex h-full w-full justify-start"
+									onClick={() => setShowReminderDialog(true)}
+								>
+									<div className="flex gap-2">
+										<IconCalendarTime className="size-5 text-sky-500" />
+										<div className="flex flex-col items-start">
+											<span className="font-semibold">{`Remind me at ${timeLabel}`}</span>
+											<span className="text-muted-foreground">{dateLabel}</span>
+										</div>
+									</div>
 								</Button>
+
+								<SelectReminderDialog
+									openDialog={showReminderDialog}
+									onOpenDialog={setShowReminderDialog}
+									defaultOptions={
+										occurrence.taskDefinition.recurrenceRule.startDateTime
+											? {
+													date: occurrence.taskDefinition.recurrenceRule.startDateTime,
+													hour: occurrence.taskDefinition.recurrenceRule.startDateTime.getHours().toString(),
+													minute: occurrence.taskDefinition.recurrenceRule.startDateTime.getMinutes().toString(),
+												}
+											: undefined
+									}
+									onPickDateTime={async (dateTime) => {
+										await handleUpdateTask({
+											taskDefinitionId: occurrence.taskDefinitionId,
+											recurrenceRule: {
+												startDateTime: new Date(
+													dateTime.date.getFullYear(),
+													dateTime.date.getMonth(),
+													dateTime.date.getDate(),
+													parseInt(dateTime.hour),
+													parseInt(dateTime.minute)
+												),
+											},
+										});
+									}}
+								/>
 							</div>
 
-							<div className="rounded border bg-background p-2">
-								<div className="flex gap-2">
-									<IconCalendarTime className="size-5 text-sky-500" />
-									<div className="flex flex-col">
-										<span className="font-semibold">{`Remind me at ${timeLabel}`}</span>
-										<span className="text-muted-foreground">{dateLabel}</span>
+							{/* Recurrence Section */}
+							<div>
+								<Button
+									variant="outline"
+									className="flex h-full w-full justify-start"
+									onClick={() => setShowRecurrenceDialog(true)}
+								>
+									<div className="flex gap-2">
+										<IconCalendarRepeat className="size-5 text-sky-500" />
+										<div className="flex flex-col items-start">
+											<span className="font-semibold">{recurrenceLabel.repetition}</span>
+
+											{weekdaysLabel && (
+												<div>
+													{weekdaysLabel.map((weekday, index) => (
+														<Fragment key={weekday.value}>
+															<span>{weekday.cond}</span>
+															{index + 1 !== weekdaysLabel.length && <span className="text-muted-foreground">, </span>}
+														</Fragment>
+													))}
+												</div>
+											)}
+
+											{recurrenceLabel.ends && (
+												<span className="text-sm text-muted-foreground">{recurrenceLabel.ends}</span>
+											)}
+										</div>
 									</div>
-								</div>
+								</Button>
+
+								<SelectRecurrenceDialog
+									openDialog={showRecurrenceDialog}
+									onOpenDialog={setShowRecurrenceDialog}
+									defaultOptions={{
+										frequency: occurrence.taskDefinition.recurrenceRule.frequency,
+										interval: occurrence.taskDefinition.recurrenceRule.interval ?? undefined,
+										endDate: occurrence.taskDefinition.recurrenceRule.endDate ?? undefined,
+										recurrenceEndType: occurrence.taskDefinition.recurrenceRule.endType,
+										dayOfMonth: occurrence.taskDefinition.recurrenceRule.dayOfMonth ?? undefined,
+										weekdays: occurrence.taskDefinition.recurrenceRule.weekdays
+											? toWeekdayObjects(occurrence.taskDefinition.recurrenceRule.weekdays)
+											: undefined,
+										maxOccurrences: occurrence.taskDefinition.recurrenceRule.maxOccurrences ?? undefined,
+									}}
+									onSaveRecurrence={async (data) =>
+										await handleUpdateTask({
+											taskDefinitionId: occurrence.taskDefinitionId,
+											recurrenceRule: {
+												frequency: data.frequency,
+												endType: data.recurrenceEndType,
+												interval: data.interval,
+												startDateTime: occurrence.taskDefinition.recurrenceRule.startDateTime,
+												maxOccurrences: data.maxOccurrences,
+												dayOfMonth: data.dayOfMonth,
+												weekdays: data.weekdays?.map((w) => w.value),
+												endDate: data.endDate,
+											},
+										})
+									}
+								/>
 							</div>
 
-							<div className="rounded border bg-background p-2">
-								<div className="flex gap-2">
-									<IconCalendarRepeat className="size-5 text-sky-500" />
-									<div className="flex flex-col">
-										<span className="font-semibold">{recurrenceLabel.repetition}</span>
-
-										{weekdaysLabel && (
-											<div>
-												{weekdaysLabel.map((weekday, index) => (
-													<Fragment key={weekday.value}>
-														<span>{weekday.cond}</span>
-														{index + 1 !== weekdaysLabel.length && <span className="text-muted-foreground">, </span>}
-													</Fragment>
-												))}
-											</div>
-										)}
-
-										{recurrenceLabel.ends && (
-											<span className="text-sm text-muted-foreground">{recurrenceLabel.ends}</span>
-										)}
-									</div>
-								</div>
-							</div>
-
+							{/* Deadline Section */}
 							{occurrence.taskDefinition.deadline && (
-								<div className="flex items-center gap-2 rounded border bg-background p-2">
-									<IconCalendarCheck className="size-5 text-sky-500" /> Ends on{' '}
-									<span className="font-semibold">
-										{dayjs(new Date(occurrence.taskDefinition.deadline)).format('MMMM D, YYYY')}
-									</span>
+								<div>
+									<Button
+										variant="outline"
+										className="flex h-full w-full justify-start"
+										onClick={() => setShowDeadlineDialog(true)}
+									>
+										<div className="flex gap-2">
+											<IconCalendarCheck className="size-5 text-sky-500" /> Ends on{' '}
+											<span className="font-semibold">
+												{dayjs(new Date(occurrence.taskDefinition.deadline)).format('MMMM D, YYYY')}
+											</span>
+										</div>
+									</Button>
+
+									<SelectDeadlineDialog
+										openDialog={showDeadlineDialog}
+										onOpenDialog={setShowDeadlineDialog}
+										defaultOptions={
+											occurrence.taskDefinition.deadline ? new Date(occurrence.taskDefinition.deadline) : undefined
+										}
+										onPickDate={async (dateTime) => {
+											await handleUpdateTask({
+												taskDefinitionId: occurrence.taskDefinitionId,
+												deadline: dateTime,
+											});
+										}}
+									/>
 								</div>
 							)}
 
+							{/* Subtask Section */}
 							<SubtaskList
 								taskDefinitionId={occurrence.taskDefinitionId}
 								subtasks={subtasksResponse && subtasksResponse.success ? subtasksResponse.data : []}
 							/>
 
+							{/* Description Section */}
 							{occurrence.taskDefinition.description && (
-								<div className="space-y-2 rounded border bg-background p-2">
+								<div className="space-y-2 rounded-md border bg-background px-4 py-2 shadow-xs dark:border-input dark:bg-input/30">
 									<div className="flex items-center gap-2">
 										<IconNote className="size-5 text-muted-foreground" />
 										<span className="text-sm text-muted-foreground">Description</span>
 									</div>
 
-									<p className="">{occurrence.taskDefinition.description}</p>
+									<TaskDescriptionInput
+										occurrence={occurrence}
+										onHandleUpdate={handleUpdateTask}
+										isPending={isPendingUpdate}
+									/>
 								</div>
+							)}
+
+							<Separator />
+
+							{/* Task lists section */}
+							{taskListResponse && taskListResponse.data && (
+								<MoveToListSelect
+									taskList={taskListResponse.data}
+									defaultValue={occurrence.taskDefinition.listSlug}
+									onSelectList={async (listSlug) => {
+										await handleUpdateTask({ taskDefinitionId: occurrence.taskDefinitionId, listSlug });
+									}}
+								/>
 							)}
 						</div>
 					</ScrollArea>

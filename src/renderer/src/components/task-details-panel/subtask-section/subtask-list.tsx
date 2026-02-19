@@ -4,16 +4,16 @@ import { useMutation } from '@tanstack/react-query';
 import { useLoadingBar } from 'react-top-loading-bar';
 import { AnimatePresence, motion, Reorder } from 'motion/react';
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../../lib/utils';
 import { IpcResponse } from '~/src/shared/types/ipc';
-import { queryClient } from '../../lib/query-client';
+import { queryClient } from '../../../lib/query-client';
 import { ISubtask } from '~/src/shared/types/subtask';
-import { errorHandler } from '../../_api/error-handler/error-handler';
+import { errorHandler } from '../../../_api/error-handler/error-handler';
 import { subtaskRepository } from '~/src/renderer/repositories/subtasks-repository';
 
-import { Button } from '../ui/button';
-import { Checkbox } from '../ui/checkbox';
-import { EditTaskInput } from './edit-task-input';
+import { Button } from '../../ui/button';
+import { Checkbox } from '../../ui/checkbox';
+import { EditSubtaskInput } from './edit-subtask-input';
 
 import { IconPlus, IconSubtask, IconTrash } from '@tabler/icons-react';
 
@@ -194,7 +194,7 @@ export function SubtaskList({ taskDefinitionId, subtasks }: IProps) {
 	}, [enableInput]);
 
 	return (
-		<div className="space-y-2 rounded border bg-background p-2 transition-all duration-200">
+		<div className="rounded-md border bg-background px-4 py-2 shadow-xs dark:border-input dark:bg-input/30">
 			<div className="flex w-full items-center justify-between gap-2">
 				<div className="flex items-center gap-2">
 					<IconSubtask className="size-5 text-sky-500" />
@@ -233,7 +233,7 @@ export function SubtaskList({ taskDefinitionId, subtasks }: IProps) {
 									disabled={isPendingComplete}
 									onCheckedChange={() => handleToggleComplete(subtask.id)}
 								/>
-								<EditTaskInput subtask={subtask} onHandleUpdate={handleEditTask} isPending={isPendingUpdate} />
+								<EditSubtaskInput subtask={subtask} onHandleUpdate={handleEditTask} isPending={isPendingUpdate} />
 							</div>
 
 							<div>

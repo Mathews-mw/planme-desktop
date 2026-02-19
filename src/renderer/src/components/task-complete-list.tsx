@@ -50,7 +50,7 @@ export function TaskCompleteList({ parentRef }: TaskCompleteListProps) {
 				<Container>
 					<Accordion type="single" collapsible defaultValue="completed-tasks">
 						<AccordionItem value="completed-tasks">
-							<AccordionTrigger>Completed Tasks</AccordionTrigger>
+							<AccordionTrigger>Completed Tasks ({tasks.length})</AccordionTrigger>
 							<AccordionContent>
 								<ul ref={listRef} className="space-y-2">
 									{tasks.map((occurrence) => {

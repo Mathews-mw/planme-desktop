@@ -128,6 +128,22 @@ ipcMain.handle(IPC.TASKS.CREATE, async (_event, raw: ICreateTaskRequest): Promis
 			task.occurrences = [TaskOccurrenceMapper.toDomain(taskOccurrence)];
 		}
 
+		if (task.recurrenceRule.frequency === 'NONE' && task.recurrenceRule.endType === 'ONCE') {
+			const [taskOccurrence] = await db
+				.insert(taskOccurrences)
+				.values({
+					id: taskOccurrenceId,
+					taskDefinitionId: taskDefinitionId,
+					occurrenceDateTime: task.recurrenceRule.startDateTime
+						? task.recurrenceRule.startDateTime.toISOString()
+						: null,
+					status: 'PENDING',
+				})
+				.returning();
+
+			task.occurrences = [TaskOccurrenceMapper.toDomain(taskOccurrence)];
+		}
+
 		return { success: true, data: task };
 	} catch (err) {
 		console.log('Internal error: ', err);

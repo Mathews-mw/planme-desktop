@@ -46,6 +46,9 @@ declare global {
 			createTask(
 				data: import('../shared/types/ipc').ICreateTaskRequest
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/task').ITask>>;
+			updateTask(
+				data: import('../shared/types/ipc').IUpdateTaskRequest
+			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
 			listingTasks(
 				query: import('../shared/types/ipc').ITaskQuery
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/task').ITask[]>>;

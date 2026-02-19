@@ -34,24 +34,67 @@ export const buttonVariants = cva(
 	}
 );
 
+type ButtonProps = React.ComponentProps<'button'> &
+	VariantProps<typeof buttonVariants> & {
+		asChild?: boolean;
+		ripple?: boolean;
+		rippleOpacity?: number;
+	};
+
 export function Button({
 	className,
 	variant = 'default',
 	size = 'default',
 	asChild = false,
+	ripple = true,
+	rippleOpacity = 0.5,
+	onPointerDown,
 	...props
-}: React.ComponentProps<'button'> &
-	VariantProps<typeof buttonVariants> & {
-		asChild?: boolean;
-	}) {
+}: ButtonProps) {
 	const Comp = asChild ? Slot : 'button';
+
+	const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+		// chama handler do usuário primeiro (ou depois, tanto faz)
+		onPointerDown?.(e);
+
+		if (!ripple) return;
+		if (variant === 'link') return; // normalmente link não tem ripple
+		if (props.disabled) return;
+		if (e.button !== 0) return; // somente clique principal (mouse)
+
+		const el = e.currentTarget as HTMLElement;
+		const rect = el.getBoundingClientRect();
+
+		const sizePx = Math.max(rect.width, rect.height);
+		const x = e.clientX - rect.left - sizePx / 2;
+		const y = e.clientY - rect.top - sizePx / 2;
+
+		const span = document.createElement('span');
+
+		span.className = 'btn-ripple';
+		span.style.width = span.style.height = `${sizePx}px`;
+		span.style.left = `${x}px`;
+		span.style.top = `${y}px`;
+		span.style.opacity = String(rippleOpacity);
+
+		el.appendChild(span);
+
+		span.addEventListener('animationend', () => {
+			span.remove();
+		});
+	};
 
 	return (
 		<Comp
 			data-slot="button"
 			data-variant={variant}
 			data-size={size}
-			className={cn(buttonVariants({ variant, size, className }))}
+			onPointerDown={handlePointerDown}
+			className={cn(
+				buttonVariants({ variant, size, className }),
+				// necessário pro ripple: posição/recorte (mas evita no link)
+				variant !== 'link' && 'relative isolate overflow-hidden'
+			)}
 			{...props}
 		/>
 	);

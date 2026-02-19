@@ -66,6 +66,7 @@ export const recurrenceRules = sqliteTable(
 
 export type DrizzleRecurrenceRule = InferSelectModel<typeof recurrenceRules>;
 export type DrizzleRecurrenceRuleInsert = InferInsertModel<typeof recurrenceRules>;
+export type DrizzleRecurrenceRuleUpdate = Partial<DrizzleRecurrenceRuleInsert>;
 
 export const taskDefinitions = sqliteTable(
 	'task_definitions',
@@ -110,7 +111,7 @@ export const taskOccurrences = sqliteTable(
 		taskDefinitionId: text('task_definition_id')
 			.notNull()
 			.references(() => taskDefinitions.id, { onDelete: 'cascade' }),
-		occurrenceDateTime: text('occurrence_date_time').notNull(), // ISO string
+		occurrenceDateTime: text('occurrence_date_time'), // ISO string
 		status: text('status').notNull().$type<'PENDING' | 'COMPLETED' | 'CANCELED' | 'SKIPPED'>().default('PENDING'),
 		note: text('note'),
 		completedAt: text('completed_at'), // ISO string

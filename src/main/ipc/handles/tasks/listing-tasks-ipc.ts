@@ -5,15 +5,16 @@ import { and, eq } from 'drizzle-orm';
 import { getDb } from '~/src/main/db';
 import { ITask } from '~/src/shared/types/task';
 import { IPC } from '~/src/shared/constants/ipc';
-import { taskOccurrences } from '~/src/main/db/schema';
 import { TaskMapper } from '~/src/main/db/mappers/task-mapper';
 import { IpcResponse, ITaskQuery } from '~/src/shared/types/ipc';
 import { taskStatusSchema } from '~/src/shared/types/task-occurrence';
+import { recurrenceRules, taskOccurrences } from '~/src/main/db/schema';
 import { zodErrorHandler } from '~/src/shared/errors/zod-errors-handler';
 
 const queryRequestSchema = z.object({
 	search: z.string().nullable().optional(),
 	status: z.optional(taskStatusSchema.nullable()),
+	overdueDateOnly: z.optional(z.coerce.boolean().default(false)),
 });
 
 ipcMain.handle(IPC.TASKS.FETCH_ALL, async (_event, query: ITaskQuery): Promise<IpcResponse<ITask[]>> => {
@@ -32,7 +33,7 @@ ipcMain.handle(IPC.TASKS.FETCH_ALL, async (_event, query: ITaskQuery): Promise<I
 		};
 	}
 
-	const { search, status } = parse.data;
+	const { search, status, overdueDateOnly } = parse.data;
 
 	const db = getDb();
 
@@ -51,6 +52,17 @@ ipcMain.handle(IPC.TASKS.FETCH_ALL, async (_event, query: ITaskQuery): Promise<I
 							.select()
 							.from(taskOccurrences)
 							.where(and(eq(taskOccurrences.taskDefinitionId, fields.id), eq(taskOccurrences.status, status)))
+					)
+				);
+			}
+
+			if (overdueDateOnly) {
+				conditions.push(
+					operators.exists(
+						db
+							.select()
+							.from(recurrenceRules)
+							.where(and(eq(recurrenceRules.frequency, 'NONE'), eq(recurrenceRules.endType, 'ONCE')))
 					)
 				);
 			}
