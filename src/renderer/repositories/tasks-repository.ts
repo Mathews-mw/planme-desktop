@@ -1,5 +1,7 @@
 import {
 	ICreateTaskRequest,
+	IDeleteTaskRequest,
+	IRecreateTaskRequest,
 	ITaskQuery,
 	IToggleTaskComplete,
 	IToggleTaskFavorite,
@@ -8,7 +10,9 @@ import {
 
 export const taskRepository = {
 	create: (payload: ICreateTaskRequest) => window.api.createTask(payload),
+	recreate: (payload: IRecreateTaskRequest) => window.api.recreateTask(payload),
 	update: (payload: IUpdateTaskRequest) => window.api.updateTask(payload),
+	delete: (payload: IDeleteTaskRequest) => window.api.deleteTask(payload),
 	listingTasks: (query: ITaskQuery) => window.api.listingTasks(query),
 	toggleComplete: (payload: IToggleTaskComplete) => window.api.toggleCompleteTask(payload),
 	toggleFavoriteTask: (payload: IToggleTaskFavorite) => window.api.toggleFavoriteTask(payload),

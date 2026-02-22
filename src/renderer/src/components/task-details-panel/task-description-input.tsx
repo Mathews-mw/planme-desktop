@@ -8,10 +8,11 @@ import { IUpdateTaskRequest } from '~/src/shared/types/ipc';
 interface IProps {
 	occurrence: ITaskOccurrenceDetails;
 	isPending?: boolean;
+	disabled?: boolean;
 	onHandleUpdate: (data: IUpdateTaskRequest) => Promise<void>;
 }
 
-export function TaskDescriptionInput({ occurrence, isPending, onHandleUpdate }: IProps) {
+export function TaskDescriptionInput({ occurrence, disabled = false, isPending, onHandleUpdate }: IProps) {
 	const [inputValue, setInputValue] = useState(occurrence.taskDefinition.description || '');
 	const [enableEditInput, setEnableEditInput] = useState(false);
 
@@ -33,7 +34,7 @@ export function TaskDescriptionInput({ occurrence, isPending, onHandleUpdate }: 
 
 	return (
 		<textarea
-			disabled={occurrence.status !== 'PENDING' || isPending}
+			disabled={disabled || occurrence.status !== 'PENDING' || isPending}
 			readOnly={enableEditInput ? false : true}
 			defaultValue={occurrence.taskDefinition.description || ''}
 			value={inputValue}
@@ -45,7 +46,7 @@ export function TaskDescriptionInput({ occurrence, isPending, onHandleUpdate }: 
 			className={cn([
 				'w-full max-w-79.25 border-b border-transparent bg-transparent font-light outline-none placeholder:text-muted-foreground',
 				'field-sizing-content resize-none disabled:cursor-default',
-				occurrence.status !== 'PENDING' ? 'text-muted-foreground line-through' : '',
+				occurrence.status !== 'PENDING' ? 'text-muted-foreground' : '',
 				enableEditInput ? 'border-input focus-visible:border-ring' : 'cursor-pointer',
 			])}
 		/>

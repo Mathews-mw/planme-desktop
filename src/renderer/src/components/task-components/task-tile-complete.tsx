@@ -1,17 +1,13 @@
 import dayjs from 'dayjs';
-import { useMutation } from '@tanstack/react-query';
+import React, { useMemo } from 'react';
 
-import { queryClient } from '../lib/query-client';
-import { taskRepository } from '../../repositories/tasks-repository';
 import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
+import { useToggleTaskOccurrenceComplete } from '../../hooks/tasks/use-toggle-task-occurrence-complete';
 
-import { Button } from './ui/button';
-import { Checkbox } from './ui/checkbox';
+import { Checkbox } from '../ui/checkbox';
 import { ToggleFavoriteTaskButton } from './toggle-favorite-task-button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
-import { Pen } from 'lucide-react';
-import { IconCalendarTime, IconDotsVertical, IconNote, IconPointFilled, IconRefresh } from '@tabler/icons-react';
+import { IconCalendarTime, IconNote, IconPointFilled, IconRefresh } from '@tabler/icons-react';
 
 interface IProps {
 	occurrence: ITaskOccurrenceDetails;
@@ -19,16 +15,13 @@ interface IProps {
 	onOpenDetails: (occurrence?: ITaskOccurrenceDetails) => void;
 }
 
-export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
+function TaskTileCompleteComponent({ occurrence, isActive, onOpenDetails }: IProps) {
 	const subtasks = occurrence.taskDefinition.subtasks;
-	const completedSubtasks = subtasks.filter((subtask) => subtask.completedAt !== null);
+	const completedSubtasksCount = useMemo(() => {
+		return occurrence.taskDefinition.subtasks.filter((s) => s.completedAt !== null).length;
+	}, [occurrence.taskDefinition.subtasks]);
 
-	const { mutateAsync: toggleCompleteFn } = useMutation({
-		mutationFn: taskRepository.toggleComplete,
-		onSuccess: async () => {
-			queryClient.invalidateQueries({ queryKey: ['occurrences'] });
-		},
-	});
+	const { handleToggleCompleteOccurrence } = useToggleTaskOccurrenceComplete();
 
 	return (
 		<div
@@ -39,13 +32,18 @@ export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
 			<Checkbox
 				className="shrink-0"
 				onClick={(e) => e.stopPropagation()}
-				onCheckedChange={async (_checked) => {
-					await toggleCompleteFn({ occurrenceId: occurrence.id, taskDefinitionId: occurrence.taskDefinitionId });
+				onCheckedChange={async () => {
+					await handleToggleCompleteOccurrence({
+						occurrenceId: occurrence.id,
+						taskDefinitionId: occurrence.taskDefinitionId,
+					});
 				}}
 			/>
 
 			<div className="flex w-full flex-1 grow flex-col">
-				<span className="text-lg font-semibold">{occurrence.taskDefinition.title}</span>
+				<span className="text-lg font-semibold text-muted-foreground line-through">
+					{occurrence.taskDefinition.title}
+				</span>
 
 				<div className="flex items-center gap-1">
 					{occurrence.occurrenceDateTime && (
@@ -64,7 +62,7 @@ export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
 						<div className="flex items-center gap-1">
 							<div className="text-sm text-muted-foreground">
 								<span>
-									{completedSubtasks.length} de {subtasks.length}
+									{completedSubtasksCount} of {subtasks.length}
 								</span>
 							</div>
 
@@ -83,37 +81,8 @@ export function TaskTile({ occurrence, isActive, onOpenDetails }: IProps) {
 					{occurrence.taskDefinition.description && <IconNote className="size-4 text-muted-foreground" />}
 				</div>
 			</div>
-
-			<div>
-				<ToggleFavoriteTaskButton taskDefinition={occurrence.taskDefinition} />
-
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button
-							size="icon"
-							variant="ghost"
-							onClick={(e) => {
-								e.stopPropagation();
-							}}
-						>
-							<IconDotsVertical />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent>
-						<DropdownMenuItem
-							onSelect={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-							}}
-						>
-							<Pen /> Edit
-						</DropdownMenuItem>
-						<DropdownMenuItem>Billing</DropdownMenuItem>
-						<DropdownMenuItem>Team</DropdownMenuItem>
-						<DropdownMenuItem>Subscription</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			</div>
 		</div>
 	);
 }
+
+export const TaskTileComplete = React.memo(TaskTileCompleteComponent);

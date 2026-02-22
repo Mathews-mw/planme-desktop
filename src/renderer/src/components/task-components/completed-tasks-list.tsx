@@ -1,22 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
-import { occurrencesRepository } from '../../repositories/occurrences-repository';
+import { occurrencesRepository } from '../../../repositories/occurrences-repository';
 
-import { Container } from './container';
-import { TaskCompleteTile } from './task-complete-tile';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { Container } from '../container';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { TaskTileComplete } from './task-tile-complete';
+import { TaskDetailsPanel } from '../task-details-panel/task-details-panel';
 
 interface TaskCompleteListProps {
 	parentRef?: (element: HTMLElement) => void;
 }
 
-export function TaskCompleteList({ parentRef }: TaskCompleteListProps) {
-	const [show, setShow] = useState(false);
-	const [selectedOccurrence, setSelectedOccurrence] = useState<ITaskOccurrenceDetails | undefined>();
+export function CompletedTaskList({ parentRef }: TaskCompleteListProps) {
 	const [detailsOpen, setDetailsOpen] = useState(false);
+	const [selectedOccurrence, setSelectedOccurrence] = useState<ITaskOccurrenceDetails | undefined>();
 
 	const [listRef] = useAutoAnimate();
 
@@ -34,15 +34,15 @@ export function TaskCompleteList({ parentRef }: TaskCompleteListProps) {
 		return occsResponse.data;
 	}, [occsResponse]);
 
-	function openDetails(occ: ITaskOccurrenceDetails) {
-		setSelectedOccurrence(occ);
+	const openDetails = useCallback((occurrence?: ITaskOccurrenceDetails) => {
+		setSelectedOccurrence(occurrence);
 		setDetailsOpen(true);
-	}
+	}, []);
 
-	function closeDetails(open: boolean) {
+	const closeDetails = useCallback((open: boolean) => {
 		setDetailsOpen(open);
 		if (!open) setSelectedOccurrence(undefined);
-	}
+	}, []);
 
 	return (
 		<>
@@ -56,7 +56,7 @@ export function TaskCompleteList({ parentRef }: TaskCompleteListProps) {
 									{tasks.map((occurrence) => {
 										return (
 											<li key={occurrence.id}>
-												<TaskCompleteTile
+												<TaskTileComplete
 													occurrence={occurrence}
 													isActive={detailsOpen && selectedOccurrence?.id === occurrence.id}
 													onOpenDetails={openDetails}
@@ -70,6 +70,8 @@ export function TaskCompleteList({ parentRef }: TaskCompleteListProps) {
 					</Accordion>
 				</Container>
 			)}
+
+			<TaskDetailsPanel open={detailsOpen} onOpenChange={closeDetails} occurrence={selectedOccurrence} />
 		</>
 	);
 }

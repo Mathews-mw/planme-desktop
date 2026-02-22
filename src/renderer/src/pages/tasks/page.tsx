@@ -1,25 +1,41 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useDeleteTaskDialog } from '../../hooks/tasks/use-delete-task-dialog';
 import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
 import { groupOccurrencesByDate } from '~/src/shared/helpers/group-occurrences-by-date';
 import { occurrencesRepository } from '~/src/renderer/repositories/occurrences-repository';
 
-import { TaskTile } from '../../components/task-tile';
+import { TaskTile } from '../../components/task-components/task-tile';
 import { Container } from '../../components/container';
-import { TaskCompleteList } from '../../components/task-complete-list';
+import { CompletedTaskList } from '../../components/task-components/completed-tasks-list';
+import { DeleteTaskDialog } from '../../components/task-components/delete-task-dialog';
 import { TaskDetailsPanel } from '../../components/task-details-panel/task-details-panel';
 
 import { IconSquareRoundedCheckFilled } from '@tabler/icons-react';
+import { taskListRepository } from '~/src/renderer/repositories/task-list-repository';
 
 export function TasksPage() {
 	const [now, setNow] = useState(() => new Date());
 	const [detailsOpen, setDetailsOpen] = useState(false);
 	const [selectedOccurrence, setSelectedOccurrence] = useState<ITaskOccurrenceDetails | undefined>();
 
-	const [animatedContainer] = useAutoAnimate();
 	const [parent] = useAutoAnimate();
+	const [animatedContainer] = useAutoAnimate();
+
+	const {
+		open: openDeleteTaskDialog,
+		taskToDelete,
+		requestDelete,
+		onOpenChange: deleteDialogOpenChange,
+	} = useDeleteTaskDialog();
+
+	const { data: taskListResponse } = useQuery({
+		queryKey: ['task-list', 'tasks-page'],
+		queryFn: taskListRepository.listingAll,
+		refetchOnWindowFocus: false,
+	});
 
 	const { data: occsResponse } = useQuery({
 		queryKey: ['occurrences', 'status:PENDING'],
@@ -36,19 +52,23 @@ export function TasksPage() {
 		return group;
 	}, [occsResponse, now]);
 
-	console.log('groups: ', groups);
+	const taskList = useMemo(() => {
+		if (!taskListResponse) {
+			return [];
+		}
 
-	function openDetails(occurrence?: ITaskOccurrenceDetails) {
-		console.log('open occurrence details: ', occurrence);
+		return taskListResponse.data;
+	}, [taskListResponse]);
 
+	const openDetails = useCallback((occurrence?: ITaskOccurrenceDetails) => {
 		setSelectedOccurrence(occurrence);
 		setDetailsOpen(true);
-	}
+	}, []);
 
-	function closeDetails(open: boolean) {
+	const closeDetails = useCallback((open: boolean) => {
 		setDetailsOpen(open);
 		if (!open) setSelectedOccurrence(undefined);
-	}
+	}, []);
 
 	useEffect(() => {
 		// Atualiza a cada 60 segundos
@@ -84,8 +104,15 @@ export function TasksPage() {
 												<li key={occurrence.id}>
 													<TaskTile
 														occurrence={occurrence}
+														taskList={taskList}
 														isActive={detailsOpen && selectedOccurrence?.id === occurrence.id}
 														onOpenDetails={openDetails}
+														onRequestDeleteTask={(taskOccurrence) =>
+															requestDelete({
+																taskDefinitionId: taskOccurrence.taskDefinitionId,
+																title: taskOccurrence.taskDefinition.title,
+															})
+														}
 													/>
 												</li>
 											);
@@ -97,10 +124,23 @@ export function TasksPage() {
 					))}
 				</div>
 
-				<TaskCompleteList parentRef={parent} />
+				<CompletedTaskList parentRef={parent} />
 			</div>
 
 			<TaskDetailsPanel open={detailsOpen} onOpenChange={closeDetails} occurrence={selectedOccurrence} />
+			<DeleteTaskDialog
+				task={taskToDelete}
+				open={openDeleteTaskDialog}
+				onOpenChange={deleteDialogOpenChange}
+				isUndoAction
+				postAction={() => {
+					// Fechar o painel de detalhes após deletar a task ativa
+					if (selectedOccurrence?.taskDefinitionId === taskToDelete?.taskDefinitionId) {
+						setDetailsOpen(false);
+						setSelectedOccurrence(undefined);
+					}
+				}}
+			/>
 		</>
 	);
 }

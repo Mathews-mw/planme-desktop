@@ -101,6 +101,10 @@ export interface IUpdateTaskRequest {
 	};
 }
 
+export interface IRecreateTaskRequest {
+	task: ITask;
+}
+
 export type ISaveTaskRequest = ITask;
 
 export interface IToggleTaskComplete {
@@ -109,6 +113,10 @@ export interface IToggleTaskComplete {
 }
 
 export interface IToggleTaskFavorite {
+	taskDefinitionId: string;
+}
+
+export interface IDeleteTaskRequest {
 	taskDefinitionId: string;
 }
 

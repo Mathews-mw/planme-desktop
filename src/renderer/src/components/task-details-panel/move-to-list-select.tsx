@@ -5,11 +5,12 @@ import { useState } from 'react';
 
 interface IProps {
 	taskList: ITaskList[];
+	disabled?: boolean;
 	onSelectList: (listSlug: string) => Promise<void>;
 	defaultValue?: string;
 }
 
-export function MoveToListSelect({ taskList, onSelectList, defaultValue }: IProps) {
+export function MoveToListSelect({ taskList, disabled = false, onSelectList, defaultValue }: IProps) {
 	const [selectedList, setSelectedList] = useState(defaultValue);
 
 	async function handleSelectList(listSlug: string) {
@@ -25,7 +26,7 @@ export function MoveToListSelect({ taskList, onSelectList, defaultValue }: IProp
 		<div className="space-y-2">
 			<Label htmlFor="list">Move to</Label>
 
-			<Select defaultValue="tasks" value={selectedList} onValueChange={handleSelectList}>
+			<Select defaultValue="tasks" disabled={disabled} value={selectedList} onValueChange={handleSelectList}>
 				<SelectTrigger id="list" className="w-full">
 					<SelectValue placeholder="Add to list..." />
 				</SelectTrigger>

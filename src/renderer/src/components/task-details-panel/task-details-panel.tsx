@@ -1,38 +1,33 @@
 import dayjs from 'dayjs';
-import { toast } from 'sonner';
 import { Fragment, useState } from 'react';
-import { useLoadingBar } from 'react-top-loading-bar';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { queryClient } from '../../lib/query-client';
-import { IUpdateTaskRequest } from '~/src/shared/types/ipc';
 import { toWeekdayObjects } from '../../utils/weekdays-utils';
 import { getRecurrenceLabel } from '../../utils/recurrence-utils';
-import { errorHandler } from '../../_api/error-handler/error-handler';
+import { useUpdateTask } from '../../hooks/tasks/use-update-task';
 import { buildReminderDateTime } from '../../utils/build-reminder-date-time';
-import { taskRepository } from '~/src/renderer/repositories/tasks-repository';
 import { type ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
 import { subtaskRepository } from '~/src/renderer/repositories/subtasks-repository';
+import { taskListRepository } from '~/src/renderer/repositories/task-list-repository';
+import { useToggleTaskOccurrenceComplete } from '../../hooks/tasks/use-toggle-task-occurrence-complete';
 
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
+import { Separator } from '../ui/separator';
 import { ScrollArea } from '../ui/scroll-area';
 import { TaskTitleInput } from './task-title-input';
-import { TaskPriorityBadge } from '../task-priority-badge';
+import { DeleteTaskButton } from './delete-task-button';
+import { MoveToListSelect } from './move-to-list-select';
+import { TaskPriorityBadge } from '../task-components/task-priority-badge';
 import { SubtaskList } from './subtask-section/subtask-list';
 import { TaskDescriptionInput } from './task-description-input';
 import { SelectReminderDialog } from '../select-reminder-dialog';
 import { SelectDeadlineDialog } from '../select-deadline-dialog';
 import { SelectRecurrenceDialog } from '../select-recurrence-dialog';
-import { ToggleFavoriteTaskButton } from '../toggle-favorite-task-button';
+import { ToggleFavoriteTaskButton } from '../task-components/toggle-favorite-task-button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 
-import { IconCalendarCheck, IconCalendarRepeat, IconCalendarTime, IconNote, IconTrash } from '@tabler/icons-react';
-import { Separator } from '../ui/separator';
-import { Label } from '../ui/label';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { taskListRepository } from '~/src/renderer/repositories/task-list-repository';
-import { MoveToListSelect } from './move-to-list-select';
+import { IconCalendarCheck, IconCalendarRepeat, IconCalendarTime, IconNote } from '@tabler/icons-react';
 
 interface IProps {
 	open: boolean;
@@ -45,7 +40,12 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 	const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
 	const [showRecurrenceDialog, setShowRecurrenceDialog] = useState(false);
 
-	const { start, complete } = useLoadingBar();
+	const { handleUpdateTask, isPendingUpdate } = useUpdateTask({
+		onSuccess: () => onOpenChange(false),
+	});
+	const { handleToggleCompleteOccurrence, isPending: isPendingComplete } = useToggleTaskOccurrenceComplete({
+		onSuccess: () => onOpenChange(false),
+	});
 
 	const { data: subtasksResponse } = useQuery({
 		queryKey: ['subtasks', occurrence?.taskDefinitionId],
@@ -89,73 +89,6 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 			? toWeekdayObjects(occurrence.taskDefinition.recurrenceRule.weekdays)
 			: null;
 
-	const { mutateAsync: updateFn, isPending: isPendingUpdate } = useMutation({
-		mutationFn: taskRepository.update,
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: ['occurrences'] });
-		},
-	});
-
-	const { mutateAsync: toggleCompleteFn, isPending: isPendingComplete } = useMutation({
-		mutationFn: taskRepository.toggleComplete,
-		onSuccess: async () => {
-			queryClient.invalidateQueries({ queryKey: ['occurrences'] });
-		},
-	});
-
-	async function handleUpdateTask(data: IUpdateTaskRequest) {
-		if (!occurrence) {
-			return;
-		}
-
-		try {
-			start('continuous');
-
-			const result = await updateFn(data);
-
-			if (!result.success) {
-				errorHandler(result.error);
-				complete();
-				return;
-			}
-
-			complete();
-			onOpenChange(false);
-		} catch (criticalError) {
-			complete();
-			console.error('IPC Communication Crash:', criticalError);
-			toast.error('Critical communication error with the system.');
-		}
-	}
-
-	async function handleToggleComplete() {
-		if (!occurrence) {
-			return;
-		}
-
-		try {
-			start('continuous');
-
-			const result = await toggleCompleteFn({
-				taskDefinitionId: occurrence.taskDefinitionId,
-				occurrenceId: occurrence.id,
-			});
-
-			if (!result.success) {
-				errorHandler(result.error);
-				complete();
-				return;
-			}
-
-			complete();
-			onOpenChange(false);
-		} catch (criticalError) {
-			complete();
-			console.error('IPC Communication Crash:', criticalError);
-			toast.error('Critical communication error with the system.');
-		}
-	}
-
 	if (!occurrence) {
 		return null;
 	}
@@ -175,6 +108,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 
 								<ToggleFavoriteTaskButton
 									taskDefinition={occurrence.taskDefinition}
+									disabled={!!occurrence.completedAt}
 									postAction={() => onOpenChange(false)}
 								/>
 							</div>
@@ -185,7 +119,12 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 									<Checkbox
 										checked={occurrence.status === 'COMPLETED'}
 										disabled={isPendingComplete}
-										onCheckedChange={() => handleToggleComplete()}
+										onCheckedChange={async () =>
+											await handleToggleCompleteOccurrence({
+												occurrenceId: occurrence.id,
+												taskDefinitionId: occurrence.taskDefinitionId,
+											})
+										}
 									/>
 									<TaskTitleInput
 										occurrence={occurrence}
@@ -199,8 +138,9 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 							<div>
 								<Button
 									variant="outline"
-									className="flex h-full w-full justify-start"
+									disabled={!!occurrence.completedAt}
 									onClick={() => setShowReminderDialog(true)}
+									className="flex h-full w-full justify-start"
 								>
 									<div className="flex gap-2">
 										<IconCalendarTime className="size-5 text-sky-500" />
@@ -244,8 +184,9 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 							<div>
 								<Button
 									variant="outline"
-									className="flex h-full w-full justify-start"
+									disabled={!!occurrence.completedAt}
 									onClick={() => setShowRecurrenceDialog(true)}
+									className="flex h-full w-full justify-start"
 								>
 									<div className="flex gap-2">
 										<IconCalendarRepeat className="size-5 text-sky-500" />
@@ -307,8 +248,9 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 								<div>
 									<Button
 										variant="outline"
-										className="flex h-full w-full justify-start"
 										onClick={() => setShowDeadlineDialog(true)}
+										disabled={!!occurrence.completedAt}
+										className="flex h-full w-full justify-start"
 									>
 										<div className="flex gap-2">
 											<IconCalendarCheck className="size-5 text-sky-500" /> Ends on{' '}
@@ -336,6 +278,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 
 							{/* Subtask Section */}
 							<SubtaskList
+								disabled={!!occurrence.completedAt}
 								taskDefinitionId={occurrence.taskDefinitionId}
 								subtasks={subtasksResponse && subtasksResponse.success ? subtasksResponse.data : []}
 							/>
@@ -349,6 +292,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 									</div>
 
 									<TaskDescriptionInput
+										disabled={!!occurrence.completedAt}
 										occurrence={occurrence}
 										onHandleUpdate={handleUpdateTask}
 										isPending={isPendingUpdate}
@@ -361,6 +305,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 							{/* Task lists section */}
 							{taskListResponse && taskListResponse.data && (
 								<MoveToListSelect
+									disabled={!!occurrence.completedAt}
 									taskList={taskListResponse.data}
 									defaultValue={occurrence.taskDefinition.listSlug}
 									onSelectList={async (listSlug) => {
@@ -376,9 +321,11 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 							Created at {dayjs(new Date(occurrence.taskDefinition.createdAt)).format('MMMM D, YYYY')}
 						</span>
 
-						<Button variant="ghost" size="icon-sm">
-							<IconTrash className="size-5 text-muted-foreground" />
-						</Button>
+						<DeleteTaskButton
+							occurrence={occurrence}
+							disabled={!!occurrence.completedAt}
+							onCloseSheet={() => onOpenChange(false)}
+						/>
 					</div>
 				</div>
 			</SheetContent>

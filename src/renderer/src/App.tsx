@@ -51,12 +51,14 @@ export function App(): React.JSX.Element {
 						<BootGate>
 							<LoadingBarContainer props={{ color: '#6141d7', height: 3, loaderSpeed: 250 }}>
 								<RouterProvider router={router} />
+								{/* <div className="scrollbar-thumb-background scrollbar-track-transparent">
+								</div> */}
 							</LoadingBarContainer>
 						</BootGate>
 					</AuthProvider>
 				</BootManagerProvider>
 
-				<ReactQueryDevtools initialIsOpen={false} />
+				<ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
 			</QueryClientProvider>
 
 			<Toaster duration={8 * 1000} />

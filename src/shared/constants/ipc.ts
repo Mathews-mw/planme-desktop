@@ -20,6 +20,7 @@ export const IPC = {
 		FETCH_ALL: 'tasks:fetch_all',
 		GET: 'tasks:get',
 		CREATE: 'tasks:create',
+		RECREATE: 'tasks:recreate',
 		UPDATE: 'tasks:update',
 		DELETE: 'tasks:delete',
 		TOGGLE_COMPLETE: 'tasks:toggle_complete',

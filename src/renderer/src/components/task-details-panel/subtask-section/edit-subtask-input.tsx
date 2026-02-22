@@ -5,11 +5,12 @@ import { ISubtask } from '~/src/shared/types/subtask';
 
 interface IProps {
 	subtask: ISubtask;
+	disabled?: boolean;
 	isPending?: boolean;
 	onHandleUpdate: (data: { subtaskId: string; title: string }) => Promise<void>;
 }
 
-export function EditSubtaskInput({ subtask, isPending, onHandleUpdate }: IProps) {
+export function EditSubtaskInput({ subtask, disabled = false, isPending, onHandleUpdate }: IProps) {
 	const [inputValue, setInputValue] = useState(subtask.title);
 	const [enableEditInput, setEnableEditInput] = useState(false);
 
@@ -31,7 +32,7 @@ export function EditSubtaskInput({ subtask, isPending, onHandleUpdate }: IProps)
 
 	return (
 		<input
-			disabled={subtask.isCompleted || isPending}
+			disabled={disabled || subtask.isCompleted || isPending}
 			readOnly={enableEditInput ? false : true}
 			defaultValue={subtask.title}
 			value={inputValue}

@@ -12,10 +12,12 @@ import {
 	ICreateUserRequest,
 	ICreateUserResponse,
 	IDeleteSubtaskRequest,
+	IDeleteTaskRequest,
 	IGetUserRequest,
 	IListingSubtasksQuery,
 	IOccurrencesQuery,
 	IpcResponse,
+	IRecreateTaskRequest,
 	IReorderSubtasksRequest,
 	ISaveTaskListRequest,
 	ITaskQuery,
@@ -71,8 +73,14 @@ const api = {
 	createTask(data: ICreateTaskRequest): Promise<IpcResponse<ITask>> {
 		return ipcRenderer.invoke(IPC.TASKS.CREATE, data);
 	},
+	recreateTask(data: IRecreateTaskRequest): Promise<IpcResponse<ITask>> {
+		return ipcRenderer.invoke(IPC.TASKS.RECREATE, data);
+	},
 	updateTask(data: IUpdateTaskRequest): Promise<IpcResponse<null>> {
 		return ipcRenderer.invoke(IPC.TASKS.UPDATE, data);
+	},
+	deleteTask(data: IDeleteTaskRequest): Promise<IpcResponse<ITask>> {
+		return ipcRenderer.invoke(IPC.TASKS.DELETE, data);
 	},
 	listingTasks(query: ITaskQuery): Promise<IpcResponse<ITask[]>> {
 		return ipcRenderer.invoke(IPC.TASKS.FETCH_ALL, query);

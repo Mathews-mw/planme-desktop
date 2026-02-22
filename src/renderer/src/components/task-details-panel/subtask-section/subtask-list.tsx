@@ -20,9 +20,10 @@ import { IconPlus, IconSubtask, IconTrash } from '@tabler/icons-react';
 interface IProps {
 	taskDefinitionId: string;
 	subtasks: Array<ISubtask>;
+	disabled?: boolean;
 }
 
-export function SubtaskList({ taskDefinitionId, subtasks }: IProps) {
+export function SubtaskList({ taskDefinitionId, subtasks, disabled = false }: IProps) {
 	const [inputValue, setInputValue] = useState('');
 	const [enableInput, setEnableInput] = useState(false);
 
@@ -60,7 +61,7 @@ export function SubtaskList({ taskDefinitionId, subtasks }: IProps) {
 		},
 	});
 
-	const { mutateAsync: reorderFn, isPending: isPendingReorder } = useMutation({
+	const { mutateAsync: reorderFn } = useMutation({
 		mutationFn: subtaskRepository.reorder,
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ['subtasks', taskDefinitionId] });
@@ -204,7 +205,7 @@ export function SubtaskList({ taskDefinitionId, subtasks }: IProps) {
 				<Button
 					variant="ghost"
 					size="sm"
-					disabled={isPending || isPendingComplete || isPendingDelete}
+					disabled={disabled || isPending || isPendingComplete || isPendingDelete}
 					onClick={() => setEnableInput(true)}
 					className="text-primary hover:text-primary"
 				>
@@ -230,17 +231,22 @@ export function SubtaskList({ taskDefinitionId, subtasks }: IProps) {
 							<div className="flex items-center gap-2">
 								<Checkbox
 									checked={subtask.isCompleted}
-									disabled={isPendingComplete}
+									disabled={disabled || isPendingComplete}
 									onCheckedChange={() => handleToggleComplete(subtask.id)}
 								/>
-								<EditSubtaskInput subtask={subtask} onHandleUpdate={handleEditTask} isPending={isPendingUpdate} />
+								<EditSubtaskInput
+									subtask={subtask}
+									disabled={disabled}
+									onHandleUpdate={handleEditTask}
+									isPending={isPendingUpdate}
+								/>
 							</div>
 
 							<div>
 								<Button
 									variant="ghost"
 									size="icon-sm"
-									disabled={isPendingDelete}
+									disabled={disabled || isPendingDelete}
 									onClick={() => handleDelete(subtask.id)}
 									className="text-muted-foreground"
 								>
