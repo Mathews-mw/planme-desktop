@@ -18,21 +18,21 @@ import { ScrollArea } from '../ui/scroll-area';
 import { TaskTitleInput } from './task-title-input';
 import { DeleteTaskButton } from './delete-task-button';
 import { MoveToListSelect } from './move-to-list-select';
-import { TaskPriorityBadge } from '../task-components/task-priority-badge';
 import { SubtaskList } from './subtask-section/subtask-list';
+import { PriorityDropdownMenu } from './priority-dropdown-menu';
 import { TaskDescriptionInput } from './task-description-input';
 import { SelectReminderDialog } from '../select-reminder-dialog';
 import { SelectDeadlineDialog } from '../select-deadline-dialog';
 import { SelectRecurrenceDialog } from '../select-recurrence-dialog';
-import { ToggleFavoriteTaskButton } from '../task-components/toggle-favorite-task-button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
+import { ToggleFavoriteTaskButton } from '../task-components/toggle-favorite-task-button';
 
 import { IconCalendarCheck, IconCalendarRepeat, IconCalendarTime, IconNote } from '@tabler/icons-react';
 
 interface IProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	occurrence?: ITaskOccurrenceDetails;
+	occurrence?: ITaskOccurrenceDetails | null;
 }
 
 export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
@@ -40,9 +40,7 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 	const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
 	const [showRecurrenceDialog, setShowRecurrenceDialog] = useState(false);
 
-	const { handleUpdateTask, isPendingUpdate } = useUpdateTask({
-		onSuccess: () => onOpenChange(false),
-	});
+	const { handleUpdateTask, isPendingUpdate } = useUpdateTask();
 	const { handleToggleCompleteOccurrence, isPending: isPendingComplete } = useToggleTaskOccurrenceComplete({
 		onSuccess: () => onOpenChange(false),
 	});
@@ -104,7 +102,12 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 					<ScrollArea className="flex-1 overflow-auto p-4">
 						<div className="space-y-4">
 							<div className="flex w-full items-center justify-between">
-								<TaskPriorityBadge priority={occurrence.taskDefinition.priority} />
+								<PriorityDropdownMenu
+									priority={occurrence.taskDefinition.priority}
+									onUpdatePriority={async (priority) =>
+										await handleUpdateTask({ taskDefinitionId: occurrence.taskDefinitionId, priority })
+									}
+								/>
 
 								<ToggleFavoriteTaskButton
 									taskDefinition={occurrence.taskDefinition}
@@ -119,8 +122,8 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 									<Checkbox
 										checked={occurrence.status === 'COMPLETED'}
 										disabled={isPendingComplete}
-										onCheckedChange={async () =>
-											await handleToggleCompleteOccurrence({
+										onCheckedChange={() =>
+											handleToggleCompleteOccurrence({
 												occurrenceId: occurrence.id,
 												taskDefinitionId: occurrence.taskDefinitionId,
 											})
@@ -163,8 +166,8 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 												}
 											: undefined
 									}
-									onPickDateTime={async (dateTime) => {
-										await handleUpdateTask({
+									onPickDateTime={(dateTime) => {
+										handleUpdateTask({
 											taskDefinitionId: occurrence.taskDefinitionId,
 											recurrenceRule: {
 												startDateTime: new Date(
@@ -225,8 +228,8 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 											: undefined,
 										maxOccurrences: occurrence.taskDefinition.recurrenceRule.maxOccurrences ?? undefined,
 									}}
-									onSaveRecurrence={async (data) =>
-										await handleUpdateTask({
+									onSaveRecurrence={(data) =>
+										handleUpdateTask({
 											taskDefinitionId: occurrence.taskDefinitionId,
 											recurrenceRule: {
 												frequency: data.frequency,
@@ -266,8 +269,8 @@ export function TaskDetailsPanel({ occurrence, open, onOpenChange }: IProps) {
 										defaultOptions={
 											occurrence.taskDefinition.deadline ? new Date(occurrence.taskDefinition.deadline) : undefined
 										}
-										onPickDate={async (dateTime) => {
-											await handleUpdateTask({
+										onPickDate={(dateTime) => {
+											handleUpdateTask({
 												taskDefinitionId: occurrence.taskDefinitionId,
 												deadline: dateTime,
 											});

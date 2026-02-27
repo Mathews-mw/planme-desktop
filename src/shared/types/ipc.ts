@@ -58,6 +58,8 @@ export interface ITaskQuery {
 export interface IOccurrencesQuery {
 	search?: string;
 	status?: ITaskStatus;
+	listSlug?: string;
+	includeAllLists?: boolean;
 	orderBy?: 'latest' | 'oldest' | 'recently_updated' | 'recently_completed';
 }
 

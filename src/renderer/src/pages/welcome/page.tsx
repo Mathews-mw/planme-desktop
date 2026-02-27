@@ -18,8 +18,6 @@ export function WelcomePage() {
 
 	const [currentTab, setCurrentTab] = useState<'login-methods' | 'credentials'>('login-methods');
 
-	console.log('Email Params:', emailQueryParams);
-
 	const router = useNavigate();
 
 	return (

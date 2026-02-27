@@ -32,6 +32,7 @@ function TaskTileCompleteComponent({ occurrence, isActive, onOpenDetails }: IPro
 			<Checkbox
 				className="shrink-0"
 				onClick={(e) => e.stopPropagation()}
+				checked={occurrence.status === 'COMPLETED'}
 				onCheckedChange={async () => {
 					await handleToggleCompleteOccurrence({
 						occurrenceId: occurrence.id,

@@ -1,5 +1,5 @@
-import { ISubtask } from '~/src/shared/types/subtask';
 import { DrizzleSubtask } from '../schema';
+import { ISubtask } from '~/src/shared/types/subtask';
 
 export class SubtaskMapper {
 	static toDomain(data: DrizzleSubtask): ISubtask {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { cn } from '../../lib/utils';
 
@@ -17,32 +17,52 @@ export function TaskDescriptionInput({ occurrence, disabled = false, isPending, 
 	const [enableEditInput, setEnableEditInput] = useState(false);
 
 	async function onUpdate() {
-		if (inputValue.trim() === '') {
-			setInputValue(occurrence.taskDefinition.description || '');
-			setEnableEditInput(false);
-			return;
-		}
+		try {
+			const next = inputValue.trim();
 
-		if (inputValue.trim() === occurrence.taskDefinition.description) {
-			setEnableEditInput(false);
-			return;
-		}
+			if (next === '') {
+				setInputValue(occurrence.taskDefinition.description || '');
+				return;
+			}
 
-		await onHandleUpdate({ taskDefinitionId: occurrence.taskDefinitionId, description: inputValue });
-		setEnableEditInput(false);
+			if (next === (occurrence.taskDefinition.description ?? '')) {
+				return;
+			}
+
+			await onHandleUpdate({ taskDefinitionId: occurrence.taskDefinitionId, description: next });
+		} finally {
+			setEnableEditInput(false);
+		}
 	}
+
+	useEffect(() => {
+		setInputValue(occurrence.taskDefinition.description || '');
+		setEnableEditInput(false);
+	}, [occurrence.id]);
+
+	useEffect(() => {
+		if (!enableEditInput) {
+			setInputValue(occurrence.taskDefinition.description || '');
+		}
+	}, [occurrence.taskDefinition.description, enableEditInput]);
 
 	return (
 		<textarea
 			disabled={disabled || occurrence.status !== 'PENDING' || isPending}
 			readOnly={enableEditInput ? false : true}
-			defaultValue={occurrence.taskDefinition.description || ''}
 			value={inputValue}
 			onChange={(e) => setInputValue(e.target.value)}
 			onDoubleClick={() => {
 				setEnableEditInput(true);
 			}}
 			onBlur={async () => onUpdate()}
+			onKeyDown={(e) => {
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					setInputValue(occurrence.taskDefinition.description || '');
+					setEnableEditInput(false);
+				}
+			}}
 			className={cn([
 				'w-full max-w-79.25 border-b border-transparent bg-transparent font-light outline-none placeholder:text-muted-foreground',
 				'field-sizing-content resize-none disabled:cursor-default',

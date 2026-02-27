@@ -1,12 +1,6 @@
 import { toast } from 'sonner';
 import { IpcError } from '~/src/shared/types/ipc';
 
-interface IParams {
-	error: unknown;
-	description?: string;
-	showErrorCode?: boolean;
-}
-
 export function errorHandler(error: IpcError) {
 	if (error.code === 'VALIDATION_ERROR' && error.fieldErrors) {
 		const fieldErros = Object.entries(error.fieldErrors);

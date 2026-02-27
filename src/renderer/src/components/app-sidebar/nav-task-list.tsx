@@ -9,7 +9,7 @@ import { taskListRepository } from '~/src/renderer/repositories/task-list-reposi
 import { NavItem } from './nav-item';
 import { EditListDialog } from './edit-list-dialog';
 import { DeleteListDialog } from './delete-list-dialog';
-import { SidebarGroup, SidebarGroupContent, SidebarMenu } from '../ui/sidebar';
+import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem } from '../ui/sidebar';
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -20,6 +20,7 @@ import {
 } from '../ui/context-menu';
 
 import { Copy, Loader2, PencilIcon, TrashIcon } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 
 interface IItemProps extends ITaskList {
 	url: string;
@@ -31,7 +32,7 @@ export function NavTaskList() {
 	const [selectedTaskList, setSelectedTaskList] = useState<ITaskList | undefined>(undefined);
 
 	const { data: taskListResponse } = useQuery({
-		queryKey: ['task-list'],
+		queryKey: ['task-list', 'sidebar-app'],
 		queryFn: taskListRepository.listingAll,
 	});
 
@@ -45,7 +46,7 @@ export function NavTaskList() {
 		return taskListResponse.data.map((taskList) => {
 			return {
 				...taskList,
-				url: `/list/${generateSlug(taskList.title)}`,
+				url: `/tasks/${generateSlug(taskList.title)}`,
 			};
 		});
 	}, [taskListResponse]);
@@ -81,37 +82,52 @@ export function NavTaskList() {
 		<>
 			<SidebarGroup>
 				<SidebarGroupContent>
-					<SidebarMenu>
-						{items.map((item) => {
-							return (
-								<ContextMenu key={item.id}>
-									<ContextMenuTrigger>
-										<NavItem to={item.url} title={item.title} />
-									</ContextMenuTrigger>
+					{taskListResponse ? (
+						<SidebarMenu>
+							{items.map((item) => {
+								return (
+									<ContextMenu key={item.id}>
+										<ContextMenuTrigger>
+											<NavItem to={item.url} title={item.title} />
+										</ContextMenuTrigger>
 
-									<ContextMenuContent>
-										<ContextMenuGroup>
-											<ContextMenuItem onSelect={() => handleToggleOpenEditDialog(true, item)}>
-												<PencilIcon />
-												Rename
-											</ContextMenuItem>
-											<ContextMenuItem disabled={isPendingCopyList} onClick={() => copyListFn({ id: item.id })}>
-												{isPendingCopyList ? <Loader2 className="animate-spin" /> : <Copy />}
-												Copy list
-											</ContextMenuItem>
-										</ContextMenuGroup>
-										<ContextMenuSeparator />
-										<ContextMenuGroup>
-											<ContextMenuItem variant="destructive" onSelect={() => handleToggleOpenDeleteDialog(true, item)}>
-												<TrashIcon />
-												Delete
-											</ContextMenuItem>
-										</ContextMenuGroup>
-									</ContextMenuContent>
-								</ContextMenu>
-							);
-						})}
-					</SidebarMenu>
+										<ContextMenuContent>
+											<ContextMenuGroup>
+												<ContextMenuItem onSelect={() => handleToggleOpenEditDialog(true, item)}>
+													<PencilIcon />
+													Rename
+												</ContextMenuItem>
+												<ContextMenuItem disabled={isPendingCopyList} onClick={() => copyListFn({ id: item.id })}>
+													{isPendingCopyList ? <Loader2 className="animate-spin" /> : <Copy />}
+													Copy list
+												</ContextMenuItem>
+											</ContextMenuGroup>
+											<ContextMenuSeparator />
+											<ContextMenuGroup>
+												<ContextMenuItem
+													variant="destructive"
+													onSelect={() => handleToggleOpenDeleteDialog(true, item)}
+												>
+													<TrashIcon />
+													Delete
+												</ContextMenuItem>
+											</ContextMenuGroup>
+										</ContextMenuContent>
+									</ContextMenu>
+								);
+							})}
+						</SidebarMenu>
+					) : (
+						<SidebarMenu className="space-y-2.5">
+							{Array.from({ length: 5 }).map((_, index) => {
+								return (
+									<SidebarMenuItem key={index}>
+										<Skeleton className="h-5 w-full" />
+									</SidebarMenuItem>
+								);
+							})}
+						</SidebarMenu>
+					)}
 				</SidebarGroupContent>
 			</SidebarGroup>
 

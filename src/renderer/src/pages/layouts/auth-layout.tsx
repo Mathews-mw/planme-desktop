@@ -7,7 +7,7 @@ export function AuthLayout() {
 	const location = useLocation();
 
 	if (status === 'authenticated') {
-		return <Navigate to="/tasks" replace state={{ from: location }} />;
+		return <Navigate to="/tasks/tasks" replace state={{ from: location }} />;
 	}
 
 	return (

@@ -76,7 +76,7 @@ const api = {
 	recreateTask(data: IRecreateTaskRequest): Promise<IpcResponse<ITask>> {
 		return ipcRenderer.invoke(IPC.TASKS.RECREATE, data);
 	},
-	updateTask(data: IUpdateTaskRequest): Promise<IpcResponse<null>> {
+	updateTask(data: IUpdateTaskRequest): Promise<IpcResponse<ITask>> {
 		return ipcRenderer.invoke(IPC.TASKS.UPDATE, data);
 	},
 	deleteTask(data: IDeleteTaskRequest): Promise<IpcResponse<ITask>> {

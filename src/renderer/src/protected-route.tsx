@@ -1,15 +1,11 @@
 import { type ReactNode } from 'react';
-import { useAuth } from './context/auth-context';
 import { Navigate } from 'react-router';
+import { useAuth } from './context/auth-context';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
-	const { user, isLoading } = useAuth();
+	const { user, status } = useAuth();
 
-	if (isLoading) {
-		return <div className="p-6">Loading...</div>;
-	}
-
-	if (!user) return <Navigate to="/" replace />;
+	if (!user && status === 'unauthenticated') return <Navigate to="/" replace />;
 
 	return children;
 }

@@ -8,7 +8,6 @@ import { TasksPage } from './pages/tasks/page';
 import { AgendaPage } from './pages/agenda/page';
 import { SignUpPage } from './pages/sign-up/page';
 import { WelcomePage } from './pages/welcome/page';
-import { TaskListPage } from './pages/task-list/page';
 import { AppLayout } from './pages/layouts/app-layout';
 import { AuthLayout } from './pages/layouts/auth-layout';
 import { FavoriteTasksPage } from './pages/favorite-tasks/page';
@@ -31,11 +30,6 @@ export const router = createBrowserRouter([
 		element: <AppLayout />,
 		children: [
 			{
-				path: 'tasks',
-				element: <TasksPage />,
-				handle: { crumb: 'Tasks' },
-			},
-			{
 				path: 'favorites',
 				element: <FavoriteTasksPage />,
 				handle: { crumb: 'Favorite Tasks' },
@@ -47,8 +41,8 @@ export const router = createBrowserRouter([
 				handle: { crumb: 'Agenda' },
 			},
 			{
-				path: 'list/:slug',
-				element: <TaskListPage />,
+				path: 'tasks/:slug',
+				element: <TasksPage />,
 				loader: async ({ params }) => {
 					const slug = params.slug!;
 

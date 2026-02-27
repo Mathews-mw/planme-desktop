@@ -6,7 +6,6 @@ import {
 } from 'firebase/auth';
 
 import { auth } from '../lib/firebase/firebase';
-import { readonly } from 'zod';
 
 interface IRegisterRequest {
 	email: string;

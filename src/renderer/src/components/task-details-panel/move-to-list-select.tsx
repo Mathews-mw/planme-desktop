@@ -1,7 +1,7 @@
 import { ITaskList } from '~/src/shared/types/task';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface IProps {
 	taskList: ITaskList[];
@@ -14,19 +14,26 @@ export function MoveToListSelect({ taskList, disabled = false, onSelectList, def
 	const [selectedList, setSelectedList] = useState(defaultValue);
 
 	async function handleSelectList(listSlug: string) {
-		if (!listSlug) {
-			return;
-		}
+		if (!listSlug) return;
 
 		setSelectedList(listSlug);
-		await onSelectList(listSlug);
+
+		try {
+			await onSelectList(listSlug);
+		} catch {
+			// não precisa fazer nada aqui se já faz rollback no cache
+		}
 	}
+
+	useEffect(() => {
+		setSelectedList(defaultValue);
+	}, [defaultValue]);
 
 	return (
 		<div className="space-y-2">
 			<Label htmlFor="list">Move to</Label>
 
-			<Select defaultValue="tasks" disabled={disabled} value={selectedList} onValueChange={handleSelectList}>
+			<Select disabled={disabled} value={selectedList ?? 'task'} onValueChange={handleSelectList}>
 				<SelectTrigger id="list" className="w-full">
 					<SelectValue placeholder="Add to list..." />
 				</SelectTrigger>

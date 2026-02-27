@@ -4,8 +4,8 @@ import { desc, eq } from 'drizzle-orm';
 
 import { getDb } from '~/src/main/db';
 import { IPC } from '~/src/shared/constants/ipc';
+import { taskDefinitions } from '~/src/main/db/schema';
 import { SubtaskMapper } from '~/src/main/db/mappers/subtask-mapper';
-import { taskDefinitions, taskOccurrences } from '~/src/main/db/schema';
 import { zodErrorHandler } from '~/src/shared/errors/zod-errors-handler';
 import { type IOccurrencesQuery, type IpcResponse } from '~/src/shared/types/ipc';
 import { TaskOccurrenceMapper } from '~/src/main/db/mappers/task-occurrence-mapper';
@@ -16,6 +16,8 @@ import { type ITaskOccurrenceDetails, taskStatusSchema } from '~/src/shared/type
 const queryRequestSchema = z.object({
 	search: z.string().nullable().optional(),
 	status: z.optional(taskStatusSchema.nullable()),
+	listSlug: z.string().nullable().optional(),
+	includeAllLists: z.coerce.boolean().optional().default(false),
 	orderBy: z
 		.union([z.literal('latest'), z.literal('oldest'), z.literal('recently_updated'), z.literal('recently_completed')])
 		.optional()
@@ -41,7 +43,7 @@ ipcMain.handle(
 			};
 		}
 
-		const { search, status, orderBy } = parse.data;
+		const { search, status, listSlug, includeAllLists, orderBy } = parse.data;
 
 		const db = getDb();
 
@@ -50,28 +52,38 @@ ipcMain.handle(
 				const conditions = [];
 
 				if (search?.trim()) {
+					const term = `%${search.trim().toLowerCase()}%`;
+
 					conditions.push(
 						operators.exists(
 							db
-								.select()
+								.select({ id: taskDefinitions.id })
 								.from(taskDefinitions)
 								.where(
-									operators.like(operators.sql`lower(${taskDefinitions.title})`, `%${search?.trim().toLowerCase()}%`)
+									operators.and(
+										eq(taskDefinitions.id, fields.taskDefinitionId),
+										operators.like(operators.sql`lower(${taskDefinitions.title})`, term)
+									)
+								)
+						)
+					);
+				}
+
+				if (listSlug && !includeAllLists) {
+					conditions.push(
+						operators.exists(
+							db
+								.select({ id: taskDefinitions.id })
+								.from(taskDefinitions)
+								.where(
+									operators.and(eq(taskDefinitions.id, fields.taskDefinitionId), eq(taskDefinitions.listSlug, listSlug))
 								)
 						)
 					);
 				}
 
 				if (status) {
-					conditions.push(
-						operators.exists(
-							db
-								.select()
-								.from(taskOccurrences)
-								.where(eq(fields.status, status))
-								.orderBy(desc(taskOccurrences.createdAt))
-						)
-					);
+					conditions.push(eq(fields.status, status));
 				}
 
 				return conditions.length ? operators.and(...conditions) : undefined;

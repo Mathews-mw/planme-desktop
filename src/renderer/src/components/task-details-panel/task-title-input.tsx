@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { cn } from '../../lib/utils';
-
-import { ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
 import { IUpdateTaskRequest } from '~/src/shared/types/ipc';
+import { ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
 
 interface IProps {
 	occurrence: ITaskOccurrenceDetails;
@@ -16,26 +15,40 @@ export function TaskTitleInput({ occurrence, isPending, onHandleUpdate }: IProps
 	const [enableEditInput, setEnableEditInput] = useState(false);
 
 	async function onUpdate() {
-		if (inputValue.trim() === '') {
-			setInputValue(occurrence.taskDefinition.title);
-			setEnableEditInput(false);
-			return;
-		}
+		try {
+			const next = inputValue.trim();
 
-		if (inputValue.trim() === occurrence.taskDefinition.title) {
-			setEnableEditInput(false);
-			return;
-		}
+			if (next === '') {
+				setInputValue(occurrence.taskDefinition.title);
+				return;
+			}
 
-		await onHandleUpdate({ taskDefinitionId: occurrence.taskDefinitionId, title: inputValue });
-		setEnableEditInput(false);
+			if (next === occurrence.taskDefinition.title) {
+				return;
+			}
+
+			await onHandleUpdate({ taskDefinitionId: occurrence.taskDefinitionId, title: next });
+		} finally {
+			setEnableEditInput(false);
+		}
 	}
+
+	useEffect(() => {
+		setInputValue(occurrence.taskDefinition.title);
+		setEnableEditInput(false);
+	}, [occurrence.id]);
+
+	useEffect(() => {
+		// se mudou no cache (optimistic/reconcile/rollback) e não está editando, reflete na UI
+		if (!enableEditInput) {
+			setInputValue(occurrence.taskDefinition.title);
+		}
+	}, [occurrence.taskDefinition.title, enableEditInput]);
 
 	return (
 		<input
 			disabled={occurrence.status !== 'PENDING' || isPending}
 			readOnly={enableEditInput ? false : true}
-			defaultValue={occurrence.taskDefinition.title}
 			value={inputValue}
 			onChange={(e) => setInputValue(e.target.value)}
 			onDoubleClick={() => {
@@ -45,6 +58,11 @@ export function TaskTitleInput({ occurrence, isPending, onHandleUpdate }: IProps
 			onKeyDown={async (e) => {
 				if (e.key === 'Enter') {
 					await onUpdate();
+				}
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					setInputValue(occurrence.taskDefinition.title);
+					setEnableEditInput(false);
 				}
 			}}
 			className={cn([

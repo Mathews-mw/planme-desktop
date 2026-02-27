@@ -12,18 +12,19 @@ import { TaskDetailsPanel } from '../task-details-panel/task-details-panel';
 
 interface TaskCompleteListProps {
 	parentRef?: (element: HTMLElement) => void;
+	listSlug?: string;
 }
 
-export function CompletedTaskList({ parentRef }: TaskCompleteListProps) {
+export function CompletedTaskList({ parentRef, listSlug }: TaskCompleteListProps) {
 	const [detailsOpen, setDetailsOpen] = useState(false);
 	const [selectedOccurrence, setSelectedOccurrence] = useState<ITaskOccurrenceDetails | undefined>();
 
 	const [listRef] = useAutoAnimate();
 
 	const { data: occsResponse } = useQuery({
-		queryKey: ['occurrences', 'status:COMPLETED'],
+		queryKey: ['occurrences', listSlug, 'status:COMPLETED'],
 		queryFn: async () =>
-			occurrencesRepository.listingOccurrences({ status: 'COMPLETED', orderBy: 'recently_completed' }),
+			occurrencesRepository.listingOccurrences({ listSlug, status: 'COMPLETED', orderBy: 'recently_completed' }),
 	});
 
 	const tasks = useMemo(() => {

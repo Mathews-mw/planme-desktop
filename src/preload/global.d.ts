@@ -51,7 +51,7 @@ declare global {
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/task').ITask>>;
 			updateTask(
 				data: import('../shared/types/ipc').IUpdateTaskRequest
-			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			): Promise<import('../shared/types/ipc').IpcResponse<ITask>>;
 			deleteTask(
 				data: import('../shared/types/ipc').IDeleteTaskRequest
 			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/task').ITask>>;
