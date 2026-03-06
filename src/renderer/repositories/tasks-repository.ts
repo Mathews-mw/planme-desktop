@@ -2,6 +2,7 @@ import {
 	ICreateTaskRequest,
 	IDeleteTaskRequest,
 	IRecreateTaskRequest,
+	ITaskCursorBasedQuery,
 	ITaskQuery,
 	IToggleTaskComplete,
 	IToggleTaskFavorite,
@@ -14,6 +15,7 @@ export const taskRepository = {
 	update: (payload: IUpdateTaskRequest) => window.api.updateTask(payload),
 	delete: (payload: IDeleteTaskRequest) => window.api.deleteTask(payload),
 	listingTasks: (query: ITaskQuery) => window.api.listingTasks(query),
+	listingTasksCursorBased: (query: ITaskCursorBasedQuery) => window.api.listingTasksCursorBased(query),
 	toggleComplete: (payload: IToggleTaskComplete) => window.api.toggleCompleteTask(payload),
 	toggleFavoriteTask: (payload: IToggleTaskFavorite) => window.api.toggleFavoriteTask(payload),
 };

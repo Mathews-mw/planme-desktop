@@ -6,7 +6,7 @@ import { IPC } from '../shared/constants/ipc';
 import { ISubtask } from '../shared/types/subtask';
 import { ITask, ITaskList } from '../shared/types/task';
 import { ITaskOccurrenceDetails } from '../shared/types/task-occurrence';
-import {
+import type {
 	ICreateSubtaskRequest,
 	ICreateTaskRequest,
 	ICreateUserRequest,
@@ -15,11 +15,16 @@ import {
 	IDeleteTaskRequest,
 	IGetUserRequest,
 	IListingSubtasksQuery,
+	IOccurrencesByTaskQuery,
+	IOccurrencesCursorBasedQuery,
+	IOccurrencesCursorBasedResponse,
 	IOccurrencesQuery,
 	IpcResponse,
 	IRecreateTaskRequest,
 	IReorderSubtasksRequest,
 	ISaveTaskListRequest,
+	ITaskCursorBasedQuery,
+	ITaskCursorBasedResponse,
 	ITaskQuery,
 	IToggleCompleteSubtaskRequest,
 	IToggleTaskComplete,
@@ -85,6 +90,9 @@ const api = {
 	listingTasks(query: ITaskQuery): Promise<IpcResponse<ITask[]>> {
 		return ipcRenderer.invoke(IPC.TASKS.FETCH_ALL, query);
 	},
+	listingTasksCursorBased(query: ITaskCursorBasedQuery): Promise<IpcResponse<ITaskCursorBasedResponse>> {
+		return ipcRenderer.invoke(IPC.TASKS.FETCH_ALL_CURSOR, query);
+	},
 	toggleCompleteTask(data: IToggleTaskComplete): Promise<IpcResponse<null>> {
 		return ipcRenderer.invoke(IPC.TASKS.TOGGLE_COMPLETE, data);
 	},
@@ -95,6 +103,14 @@ const api = {
 	// === Occurrences ===
 	listingOccurrences(query: IOccurrencesQuery): Promise<IpcResponse<ITaskOccurrenceDetails[]>> {
 		return ipcRenderer.invoke(IPC.OCCURRENCES.FETCH_ALL, query);
+	},
+	listingOccurrencesCursorBased(
+		query: IOccurrencesCursorBasedQuery
+	): Promise<IpcResponse<IOccurrencesCursorBasedResponse>> {
+		return ipcRenderer.invoke(IPC.OCCURRENCES.FETCH_ALL_CURSOR, query);
+	},
+	getOccurrencesByTask(query: IOccurrencesByTaskQuery): Promise<IpcResponse<ITaskOccurrenceDetails[]>> {
+		return ipcRenderer.invoke(IPC.OCCURRENCES.GET_MANY_BY_TASK, query);
 	},
 
 	// === Subtasks ===

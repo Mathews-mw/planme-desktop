@@ -27,7 +27,7 @@ const queryRequestSchema = z.object({
 ipcMain.handle(
 	IPC.OCCURRENCES.FETCH_ALL,
 	async (_event, query: IOccurrencesQuery): Promise<IpcResponse<ITaskOccurrenceDetails[]>> => {
-		console.log('query params: ', query);
+		// console.log('query params: ', query);
 		const parse = queryRequestSchema.safeParse(query);
 
 		if (!parse.success) {

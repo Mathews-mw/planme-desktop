@@ -5,6 +5,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png';
 
 import './ipc';
+import { createShortcuts } from './shortcuts';
 
 function createWindow(): void {
 	// Create the browser window.
@@ -30,6 +31,8 @@ function createWindow(): void {
 			sandbox: false,
 		},
 	});
+
+	createShortcuts(mainWindow);
 
 	mainWindow.on('ready-to-show', () => {
 		mainWindow.show();

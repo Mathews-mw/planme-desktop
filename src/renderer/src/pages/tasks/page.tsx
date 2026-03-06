@@ -55,6 +55,12 @@ export function TasksPage() {
 			}),
 	});
 
+	const { data: completedOccsResponse } = useQuery({
+		queryKey: ['occurrences', listSlug, 'status:COMPLETED'],
+		queryFn: async () =>
+			occurrencesRepository.listingOccurrences({ listSlug, status: 'COMPLETED', orderBy: 'recently_completed' }),
+	});
+
 	const groups = useMemo(() => {
 		if (!occResponse || !occResponse.success) {
 			return [];
@@ -64,6 +70,14 @@ export function TasksPage() {
 
 		return group;
 	}, [occResponse, now]);
+
+	const completedOccurrences = useMemo(() => {
+		if (!completedOccsResponse || !completedOccsResponse.success) {
+			return [];
+		}
+
+		return completedOccsResponse.data;
+	}, [completedOccsResponse]);
 
 	const taskList = useMemo(() => {
 		if (!taskListResponse) {
@@ -148,7 +162,7 @@ export function TasksPage() {
 					))}
 				</div>
 
-				<CompletedTaskList parentRef={parent} listSlug={listSlug} />
+				<CompletedTaskList completedOccurrences={completedOccurrences} />
 			</div>
 
 			<TaskDetailsPanel open={detailsOpen} onOpenChange={closeDetails} occurrence={selectedOccurrence} />

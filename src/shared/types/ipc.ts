@@ -1,6 +1,6 @@
 import { ITask } from './task';
-import { ITaskStatus } from './task-occurrence';
-import { ITaskPriority } from './task-definition';
+import { ITaskOccurrenceDetails, ITaskStatus } from './task-occurrence';
+import { ITaskDefinition, ITaskPriority } from './task-definition';
 import { IRecurrenceEndType, IRecurrenceFrequency } from './recurrence-rule';
 
 // ===IPC Errors ===
@@ -55,12 +55,28 @@ export interface ITaskQuery {
 	overdueDateOnly?: boolean;
 }
 
+export interface ITaskCursorBasedQuery {
+	cursor?: string;
+	limit: number;
+	search?: string;
+}
+
 export interface IOccurrencesQuery {
 	search?: string;
 	status?: ITaskStatus;
 	listSlug?: string;
 	includeAllLists?: boolean;
 	orderBy?: 'latest' | 'oldest' | 'recently_updated' | 'recently_completed';
+}
+
+export interface IOccurrencesCursorBasedQuery {
+	cursor?: string;
+	limit: number;
+	search?: string;
+}
+
+export interface IOccurrencesByTaskQuery {
+	taskDefinitionId: string;
 }
 
 export interface ICreateTaskRequest {
@@ -160,4 +176,18 @@ export interface ICreateUserResponse {
 
 export interface ICreateTaskResponse {
 	data: ITask;
+}
+
+export interface ITaskCursorBasedResponse {
+	nextCursor?: string;
+	previousCursor?: string;
+	hasMore: boolean;
+	tasks: Array<ITaskDefinition>;
+}
+
+export interface IOccurrencesCursorBasedResponse {
+	nextCursor?: string;
+	previousCursor?: string;
+	hasMore: boolean;
+	occurrences: Array<ITaskOccurrenceDetails>;
 }

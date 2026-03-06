@@ -21,6 +21,7 @@ import {
 
 import { Copy, Loader2, PencilIcon, TrashIcon } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
+import { IconList } from '@tabler/icons-react';
 
 interface IItemProps extends ITaskList {
 	url: string;
@@ -88,7 +89,7 @@ export function NavTaskList() {
 								return (
 									<ContextMenu key={item.id}>
 										<ContextMenuTrigger>
-											<NavItem to={item.url} title={item.title} />
+											<NavItem to={item.url} title={item.title} icon={IconList} />
 										</ContextMenuTrigger>
 
 										<ContextMenuContent>

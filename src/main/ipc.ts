@@ -14,11 +14,14 @@ import './ipc/handles/tasks/update-task-ipc';
 import './ipc/handles/tasks/delete-task-ipc';
 import './ipc/handles/tasks/recreate-task-ipc';
 import './ipc/handles/tasks/listing-tasks-ipc';
+import './ipc/handles/tasks/listing-tasks-cursor-based-ipc';
 import './ipc/handles/tasks/toggle-complete-task-ipc';
 import './ipc/handles/tasks/toggle-favorite-task-ipc';
 
 // === Occurrences Imports ===
 import './ipc/handles/occurrences/listing-occurrences-ipc';
+import './ipc/handles/occurrences/get-occurrences-by-task-ipc';
+import './ipc/handles/occurrences/listing-occurrences-cursor-based-ipc';
 
 // === Subtasks Imports ===
 import './ipc/handles/subtasks/create-subtask-ipc';

@@ -1,21 +1,37 @@
+import { Kbd, KbdGroup } from './ui/kbd';
 import { Separator } from './ui/separator';
-import { SearchForm } from './search-form';
-import { SidebarTrigger } from './ui/sidebar';
+import { SidebarTrigger, useSidebar } from './ui/sidebar';
 import { BreadcrumbsNavigation } from './breadcrumbs-navigation';
 import { CreateTaskSheet } from './create-task-sheet/create-task-sheet';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export function Header() {
+	const { open } = useSidebar();
+
 	return (
 		<header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b py-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-			<div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-				<SidebarTrigger className="-ml-1" />
+			<div className="flex w-full items-center justify-between gap-1 px-4 lg:gap-2 lg:px-6">
+				<div className="flex items-center">
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<SidebarTrigger className="-ml-1" />
+						</TooltipTrigger>
 
-				<Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
+						<TooltipContent side="right">
+							<div className="flex items-center gap-2">
+								{open ? 'Collapse Sidebar' : 'Expand Sidebar'}:{' '}
+								<KbdGroup>
+									<Kbd>Ctrl</Kbd>
+									<span>+</span>
+									<Kbd>B</Kbd>
+								</KbdGroup>
+							</div>
+						</TooltipContent>
+					</Tooltip>
 
-				<BreadcrumbsNavigation />
+					<Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
 
-				<div className="mx-auto">
-					<SearchForm />
+					<BreadcrumbsNavigation />
 				</div>
 
 				<CreateTaskSheet />

@@ -4,6 +4,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { errorHandler } from '../../_api/error-handler/error-handler';
 import { taskRepository } from '~/src/renderer/repositories/tasks-repository';
+import { IpcResponse } from '~/src/shared/types/ipc';
+import { ITaskOccurrenceDetails } from '~/src/shared/types/task-occurrence';
+
+type OccurrencesQueryData = IpcResponse<ITaskOccurrenceDetails[]>;
 
 interface ToggleTaskOccurrenceCompleteInput {
 	taskDefinitionId: string;
@@ -22,6 +26,14 @@ export function useToggleFavoriteTask(options?: IOptions) {
 		mutationFn: taskRepository.toggleFavoriteTask,
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ['occurrences'] });
+		},
+		onMutate: async (variables, context) => {
+			await queryClient.cancelQueries({ queryKey: ['occurrences'] });
+
+			// Snapshot de todas as variações da query ['occurrences', ...]
+			const previousQueries = queryClient.getQueriesData<OccurrencesQueryData>({
+				queryKey: ['occurrences'],
+			});
 		},
 	});
 

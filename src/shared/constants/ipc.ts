@@ -18,6 +18,7 @@ export const IPC = {
 	},
 	TASKS: {
 		FETCH_ALL: 'tasks:fetch_all',
+		FETCH_ALL_CURSOR: 'tasks:fetch_all_cursor',
 		GET: 'tasks:get',
 		CREATE: 'tasks:create',
 		RECREATE: 'tasks:recreate',
@@ -28,6 +29,8 @@ export const IPC = {
 	},
 	OCCURRENCES: {
 		FETCH_ALL: 'occurrences:fetch_all',
+		FETCH_ALL_CURSOR: 'occurrences:fetch_all_cursor',
+		GET_MANY_BY_TASK: 'occurrences:get_many_by_task',
 	},
 	SUBTASKS: {
 		FETCH_ALL: 'subtasks:fetch_all',

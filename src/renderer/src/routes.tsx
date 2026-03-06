@@ -11,6 +11,7 @@ import { WelcomePage } from './pages/welcome/page';
 import { AppLayout } from './pages/layouts/app-layout';
 import { AuthLayout } from './pages/layouts/auth-layout';
 import { FavoriteTasksPage } from './pages/favorite-tasks/page';
+import { OccurrencesByTaskPage } from './pages/occurrences-by-task/page';
 
 export const router = createBrowserRouter([
 	{
@@ -56,6 +57,11 @@ export const router = createBrowserRouter([
 						return crumbLabel;
 					},
 				},
+			},
+			{
+				path: 'occurrences/:taskDefinitionId',
+				element: <OccurrencesByTaskPage />,
+				handle: { crumb: 'Occurrences' },
 			},
 		],
 	},
