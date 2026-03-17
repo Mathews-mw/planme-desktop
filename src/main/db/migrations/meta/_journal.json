@@ -78,6 +78,13 @@
       "when": 1771455863552,
       "tag": "0010_cuddly_misty_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1773416338045,
+      "tag": "0011_low_omega_sentinel",
+      "breakpoints": true
     }
   ]
 }

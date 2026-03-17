@@ -1,11 +1,11 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
-import { ISubtask } from '../shared/types/subtask';
 
 export {};
 
 declare global {
 	interface Window {
 		electron: ElectronAPI;
+
 		api: {
 			// === Auth ===
 			getLastActiveUser(): Promise<
@@ -101,7 +101,16 @@ declare global {
 			): Promise<import('../shared/types/ipc').IpcResponse<null>>;
 			listingSubtask(
 				data: import('../shared/types/ipc').IListingSubtasksQuery
-			): Promise<import('../shared/types/ipc').IpcResponse<ISubtask[]>>;
+			): Promise<import('../shared/types/ipc').IpcResponse<import('../shared/types/subtask').ISubtask[]>>;
+		};
+
+		notificationsApi: {
+			show: (
+				payload: import('../shared/types/ipc').IShowNotificationPayload
+			) => Promise<import('../shared/types/ipc').IShowNotificationResponse>;
+			onClick: (callback: (payload: import('../shared/types/ipc').INotificationClickPayload) => void) => () => void;
+			syncTaskDefinition: (taskDefinitionId: string) => Promise<import('../shared/types/ipc').IpcResponse<null>>;
+			reload: () => Promise<import('../shared/types/ipc').IpcResponse<null>>;
 		};
 	}
 }

@@ -7,6 +7,7 @@ import { IPC } from '~/src/shared/constants/ipc';
 import { TaskMapper } from '~/src/main/db/mappers/task-mapper';
 import { IDeleteTaskRequest, IpcResponse } from '~/src/shared/types/ipc';
 import { recurrenceRules, subtasks, taskDefinitions, taskOccurrences } from '~/src/main/db/schema';
+import { taskNotificationScheduler } from '../../notifications/task-notification-scheduler-factory';
 
 ipcMain.handle(
 	IPC.TASKS.DELETE,
@@ -53,6 +54,10 @@ ipcMain.handle(
 				recurrenceRule: taskDefinition.recurrenceRule,
 				occurrences: taskDefinition.occurrences,
 				subtasks: taskDefinition.subtasks,
+			});
+
+			void taskNotificationScheduler.syncTaskDefinition(taskDefinitionId).catch((err) => {
+				console.error('Scheduler sync failed:', err);
 			});
 
 			return { success: true, data: taskReference };

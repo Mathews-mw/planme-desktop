@@ -16,6 +16,7 @@ import { type ITaskOccurrenceDetails, taskStatusSchema } from '~/src/shared/type
 const queryRequestSchema = z.object({
 	search: z.string().nullable().optional(),
 	status: z.optional(taskStatusSchema.nullable()),
+	isStarred: z.coerce.boolean().optional().default(false),
 	listSlug: z.string().nullable().optional(),
 	includeAllLists: z.coerce.boolean().optional().default(false),
 	orderBy: z
@@ -27,7 +28,7 @@ const queryRequestSchema = z.object({
 ipcMain.handle(
 	IPC.OCCURRENCES.FETCH_ALL,
 	async (_event, query: IOccurrencesQuery): Promise<IpcResponse<ITaskOccurrenceDetails[]>> => {
-		// console.log('query params: ', query);
+		console.log('query params: ', query);
 		const parse = queryRequestSchema.safeParse(query);
 
 		if (!parse.success) {
@@ -43,7 +44,7 @@ ipcMain.handle(
 			};
 		}
 
-		const { search, status, listSlug, includeAllLists, orderBy } = parse.data;
+		const { search, status, listSlug, isStarred, includeAllLists, orderBy } = parse.data;
 
 		const db = getDb();
 
@@ -77,6 +78,22 @@ ipcMain.handle(
 								.from(taskDefinitions)
 								.where(
 									operators.and(eq(taskDefinitions.id, fields.taskDefinitionId), eq(taskDefinitions.listSlug, listSlug))
+								)
+						)
+					);
+				}
+
+				if (isStarred) {
+					conditions.push(
+						operators.exists(
+							db
+								.select({ id: taskDefinitions.id })
+								.from(taskDefinitions)
+								.where(
+									operators.and(
+										eq(taskDefinitions.id, fields.taskDefinitionId),
+										eq(taskDefinitions.isStarred, isStarred)
+									)
 								)
 						)
 					);

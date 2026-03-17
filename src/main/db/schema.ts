@@ -114,6 +114,7 @@ export const taskOccurrences = sqliteTable(
 		occurrenceDateTime: text('occurrence_date_time'), // ISO string
 		status: text('status').notNull().$type<'PENDING' | 'COMPLETED' | 'CANCELED' | 'SKIPPED'>().default('PENDING'),
 		note: text('note'),
+		notifiedAt: text('notified_at'),
 		completedAt: text('completed_at'), // ISO string
 		createdAt: text('created_at')
 			.notNull()

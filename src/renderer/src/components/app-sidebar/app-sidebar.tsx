@@ -24,7 +24,7 @@ export function AppSidebar() {
 					<SidebarMenuItem>
 						<SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
 							<a href="#" className="flex items-center">
-								<img src={logoImage} className="size-6 object-cover" />
+								<img src={logoImage} alt="logo" className="size-6 object-cover" />
 								<span className="text-base font-semibold">Plan Me</span>
 							</a>
 						</SidebarMenuButton>

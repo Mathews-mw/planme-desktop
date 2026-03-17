@@ -1,5 +1,7 @@
-import { useParams } from 'react-router';
+import z from 'zod';
+import { AnimatePresence } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
+import { useParams, useSearchParams } from 'react-router';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -10,7 +12,11 @@ import { taskListRepository } from '~/src/renderer/repositories/task-list-reposi
 import { groupOccurrencesByDate } from '~/src/shared/helpers/group-occurrences-by-date';
 import { occurrencesRepository } from '~/src/renderer/repositories/occurrences-repository';
 
+import { NoTasks } from './no-tasks';
+import { NoStarredTasks } from './no-starred-tasks';
 import { Container } from '../../components/container';
+import { AllTasksCompleted } from './all-tasks-completed';
+import { FavoriteTasksFilter } from './favorite-tasks-filter';
 import { TaskTile } from '../../components/task-components/task-tile';
 import { DeleteTaskDialog } from '../../components/task-components/delete-task-dialog';
 import { CompletedTaskList } from '../../components/task-components/completed-tasks-list';
@@ -20,6 +26,9 @@ import { IconSquareRoundedCheckFilled } from '@tabler/icons-react';
 
 export function TasksPage() {
 	const { slug: listSlug } = useParams();
+	const [searchParams] = useSearchParams();
+
+	const isStarredParams = z.coerce.boolean().parse(searchParams.get('isStarred') ?? false);
 
 	const [now, setNow] = useState(() => new Date());
 	const [selectedOccurrenceId, setSelectedOccurrenceId] = useState<string | null>(null);
@@ -40,23 +49,31 @@ export function TasksPage() {
 		refetchOnWindowFocus: false,
 	});
 
+	const { data: currentListSlug } = useQuery({
+		queryKey: ['task-list', listSlug],
+		queryFn: async () => await taskListRepository.getBySlug({ slug: listSlug ?? '' }),
+		enabled: !!listSlug,
+	});
+
 	const { data: occResponse } = useQuery<IpcResponse<ITaskOccurrenceDetails[]>>({
 		queryKey: [
 			'occurrences',
-			listSlug,
-			`include_all:${listSlug && listSlug === 'tasks' ? true : false}`,
 			'status:PENDING',
+			`include_all:${listSlug && listSlug === 'tasks' ? true : false}`,
+			listSlug,
+			`starred:${isStarredParams}`,
 		],
 		queryFn: async () =>
 			occurrencesRepository.listingOccurrences({
 				status: 'PENDING',
 				listSlug: listSlug,
+				isStarred: isStarredParams,
 				includeAllLists: listSlug && listSlug === 'tasks' ? true : false,
 			}),
 	});
 
 	const { data: completedOccsResponse } = useQuery({
-		queryKey: ['occurrences', listSlug, 'status:COMPLETED'],
+		queryKey: ['occurrences', 'status:COMPLETED', listSlug],
 		queryFn: async () =>
 			occurrencesRepository.listingOccurrences({ listSlug, status: 'COMPLETED', orderBy: 'recently_completed' }),
 	});
@@ -117,10 +134,26 @@ export function TasksPage() {
 	return (
 		<>
 			<div ref={animatedContainer} className="flex flex-col space-y-8">
-				<div className="flex items-center gap-2">
-					<IconSquareRoundedCheckFilled className="size-7 text-primary" />
-					<h1 className="text-xl font-semibold">All Tasks</h1>
+				<div className="flex w-full items-center justify-between">
+					<div className="flex items-center gap-2">
+						<IconSquareRoundedCheckFilled className="size-7 text-primary" />
+						<h1 className="text-xl font-semibold">
+							{currentListSlug && currentListSlug.success ? currentListSlug.data.title : 'All Tasks'}
+						</h1>
+					</div>
+
+					{(groups.length > 0 || isStarredParams) && <FavoriteTasksFilter />}
 				</div>
+
+				<AnimatePresence>
+					{groups.length === 0 && completedOccurrences.length === 0 && !isStarredParams && <NoTasks />}
+				</AnimatePresence>
+
+				<AnimatePresence>{isStarredParams && groups.length === 0 && <NoStarredTasks />}</AnimatePresence>
+
+				<AnimatePresence>
+					{groups.length === 0 && completedOccurrences.length > 0 && !isStarredParams && <AllTasksCompleted />}
+				</AnimatePresence>
 
 				<div className="space-y-4">
 					{groups.map((group) => (
@@ -162,7 +195,7 @@ export function TasksPage() {
 					))}
 				</div>
 
-				<CompletedTaskList completedOccurrences={completedOccurrences} />
+				{completedOccurrences.length > 0 && <CompletedTaskList completedOccurrences={completedOccurrences} />}
 			</div>
 
 			<TaskDetailsPanel open={detailsOpen} onOpenChange={closeDetails} occurrence={selectedOccurrence} />

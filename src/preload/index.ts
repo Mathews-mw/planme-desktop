@@ -15,6 +15,7 @@ import type {
 	IDeleteTaskRequest,
 	IGetUserRequest,
 	IListingSubtasksQuery,
+	INotificationClickPayload,
 	IOccurrencesByTaskQuery,
 	IOccurrencesCursorBasedQuery,
 	IOccurrencesCursorBasedResponse,
@@ -23,6 +24,8 @@ import type {
 	IRecreateTaskRequest,
 	IReorderSubtasksRequest,
 	ISaveTaskListRequest,
+	IShowNotificationPayload,
+	IShowNotificationResponse,
 	ITaskCursorBasedQuery,
 	ITaskCursorBasedResponse,
 	ITaskQuery,
@@ -134,16 +137,44 @@ const api = {
 	},
 };
 
+const notificationsApi = {
+	show(payload: IShowNotificationPayload): Promise<IShowNotificationResponse> {
+		return ipcRenderer.invoke('notifications:show', payload);
+	},
+
+	onClick(callback: (payload: INotificationClickPayload) => void): () => void {
+		const listener = (_event: Electron.IpcRendererEvent, payload: INotificationClickPayload) => {
+			callback(payload);
+		};
+
+		ipcRenderer.on('notifications:clicked', listener);
+
+		return () => {
+			ipcRenderer.removeListener('notifications:clicked', listener);
+		};
+	},
+
+	syncTaskDefinition(taskDefinitionId: string): Promise<IpcResponse<null>> {
+		return ipcRenderer.invoke(IPC.NOTIFICATIONS.SYNC, taskDefinitionId);
+	},
+
+	reload(): Promise<IpcResponse<null>> {
+		return ipcRenderer.invoke(IPC.NOTIFICATIONS.RELOAD);
+	},
+};
+
 console.log('preload loaded. contextIsolated:', process.contextIsolated);
 
 if (process.contextIsolated) {
 	try {
 		contextBridge.exposeInMainWorld('electron', electronAPI);
 		contextBridge.exposeInMainWorld('api', api);
+		contextBridge.exposeInMainWorld('notificationsApi', notificationsApi);
 	} catch (error) {
 		console.error(error);
 	}
 } else {
 	window.electron = electronAPI;
 	window.api = api;
+	window.notificationsApi = notificationsApi;
 }

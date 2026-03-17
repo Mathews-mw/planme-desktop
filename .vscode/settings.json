@@ -28,5 +28,6 @@
 	},
 	"[dockercompose]": {
 		"editor.insertSpaces": false
-	}
+	},
+	"cSpell.words": ["Unnotified"]
 }

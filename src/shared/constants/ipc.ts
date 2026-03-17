@@ -41,4 +41,9 @@ export const IPC = {
 		REORDER: 'subtasks:reorder',
 		TOGGLE_COMPLETE: 'subtasks:toggle_complete',
 	},
+	NOTIFICATIONS: {
+		SHOW: 'notifications:show',
+		SYNC: 'notifications:sync',
+		RELOAD: 'notifications:reload',
+	},
 } as const;

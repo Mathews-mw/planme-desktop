@@ -1,15 +1,45 @@
 import { join } from 'node:path';
-import { app, shell, BrowserWindow, session } from 'electron';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { app, shell, BrowserWindow, session, ipcMain } from 'electron';
 
 import icon from '../../resources/icon.png';
 
 import './ipc';
 import { createShortcuts } from './shortcuts';
+import { createTray, registerCloseToTray, setAppQuitting } from './tray';
+import { showLocalNotification } from './ipc/notifications/notification';
+import { taskNotificationScheduler } from './ipc/notifications/task-notification-scheduler-factory';
+
+export type IShowNotificationPayload = {
+	title: string;
+	body: string;
+	silent?: boolean;
+	notificationId?: string;
+};
+
+let mainWindow: BrowserWindow | null = null;
+let isReadyToNotify = false;
+
+const pendingNotifications: Array<{
+	payload: IShowNotificationPayload;
+	resolve: (value: unknown) => void;
+	reject: (reason?: unknown) => void;
+}> = [];
+
+function flushPendingNotifications() {
+	if (!mainWindow) return;
+
+	isReadyToNotify = true;
+
+	while (pendingNotifications.length > 0) {
+		const { payload, resolve } = pendingNotifications.shift()!;
+		resolve(showLocalNotification(mainWindow, payload));
+	}
+}
 
 function createWindow(): void {
 	// Create the browser window.
-	const mainWindow = new BrowserWindow({
+	const window = new BrowserWindow({
 		width: 1120,
 		height: 700,
 		minWidth: 390,
@@ -32,26 +62,36 @@ function createWindow(): void {
 		},
 	});
 
-	createShortcuts(mainWindow);
+	mainWindow = window;
 
-	mainWindow.on('ready-to-show', () => {
-		mainWindow.show();
+	registerCloseToTray(window);
+	createTray(window);
+	createShortcuts(window);
+
+	window.on('ready-to-show', () => {
+		window.show();
+		flushPendingNotifications();
 	});
 
-	mainWindow.webContents.setWindowOpenHandler((details) => {
+	window.webContents.setWindowOpenHandler((details) => {
 		shell.openExternal(details.url);
 		return { action: 'deny' };
 	});
 
 	if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-		mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+		window.loadURL(process.env['ELECTRON_RENDERER_URL']);
 	} else {
-		mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+		window.loadFile(join(__dirname, '../renderer/index.html'));
 	}
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
 	electronApp.setAppUserModelId('com.electron');
+
+	// To quickly bootstrap notifications during development
+	if (process.platform === 'win32') {
+		app.setAppUserModelId(process.execPath);
+	}
 
 	app.on('browser-window-created', (_, window) => {
 		optimizer.watchWindowShortcuts(window);
@@ -75,6 +115,18 @@ app.whenReady().then(() => {
 		});
 	});
 
+	ipcMain.handle('notifications:show', (_event, payload: IShowNotificationPayload) => {
+		return new Promise((resolve, reject) => {
+			if (isReadyToNotify && mainWindow) {
+				resolve(showLocalNotification(mainWindow, payload));
+				return;
+			}
+
+			pendingNotifications.push({ payload, resolve, reject });
+		});
+	});
+
+	await taskNotificationScheduler.start();
 	createWindow();
 
 	app.on('activate', function () {
@@ -82,8 +134,15 @@ app.whenReady().then(() => {
 	});
 });
 
+app.on('before-quit', () => {
+	taskNotificationScheduler.stop();
+	setAppQuitting(true);
+});
+
 app.on('window-all-closed', () => {
-	if (process.platform !== 'darwin') {
-		app.quit();
-	}
+	// Intencionalmente vazio para manter o app vivo mesmo sem janelas abertas
+	// Tray vai interceptar o comando para gerenciar quando minimizar o encerrar a aplicação
+	// if (process.platform !== 'darwin') {
+	// 	app.quit();
+	// }
 });

@@ -11,6 +11,7 @@ import { zodErrorHandler } from '~/src/shared/errors/zod-errors-handler';
 import { IpcResponse, IToggleTaskComplete } from '~/src/shared/types/ipc';
 import { RecurrenceRuleMapper } from '~/src/main/db/mappers/recurrence-rule-mapper';
 import { TaskOccurrencesPlanner } from '~/src/shared/recurrence-engine/task-occurrences-planner';
+import { taskNotificationScheduler } from '../../notifications/task-notification-scheduler-factory';
 
 const requestSchema = z.object({
 	occurrenceId: z.string(),
@@ -99,7 +100,7 @@ ipcMain.handle(IPC.TASKS.TOGGLE_COMPLETE, async (_event, raw: IToggleTaskComplet
 
 			const generateOccurrences = TaskOccurrencesPlanner.generateInitialOccurrences({
 				rule: RecurrenceRuleMapper.toDomain(recurrenceRule),
-				fromDate: new Date(taskOccurrence.occurrenceDateTime),
+				fromDate: taskOccurrence.occurrenceDateTime ? new Date(taskOccurrence.occurrenceDateTime) : new Date(),
 				horizonDays: 365,
 				limit: 1,
 			});
@@ -118,6 +119,10 @@ ipcMain.handle(IPC.TASKS.TOGGLE_COMPLETE, async (_event, raw: IToggleTaskComplet
 				});
 			}
 		}
+
+		void taskNotificationScheduler.syncTaskDefinition(taskDefinition.id).catch((err) => {
+			console.error('Scheduler sync failed:', err);
+		});
 
 		return { success: true, data: null };
 	} catch (error) {

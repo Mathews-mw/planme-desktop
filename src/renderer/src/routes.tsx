@@ -10,7 +10,6 @@ import { SignUpPage } from './pages/sign-up/page';
 import { WelcomePage } from './pages/welcome/page';
 import { AppLayout } from './pages/layouts/app-layout';
 import { AuthLayout } from './pages/layouts/auth-layout';
-import { FavoriteTasksPage } from './pages/favorite-tasks/page';
 import { OccurrencesByTaskPage } from './pages/occurrences-by-task/page';
 
 export const router = createBrowserRouter([
@@ -30,11 +29,6 @@ export const router = createBrowserRouter([
 		path: '/',
 		element: <AppLayout />,
 		children: [
-			{
-				path: 'favorites',
-				element: <FavoriteTasksPage />,
-				handle: { crumb: 'Favorite Tasks' },
-			},
 			{
 				path: 'agenda',
 				element: <AgendaPage />,

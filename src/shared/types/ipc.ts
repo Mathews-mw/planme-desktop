@@ -65,6 +65,7 @@ export interface IOccurrencesQuery {
 	search?: string;
 	status?: ITaskStatus;
 	listSlug?: string;
+	isStarred?: boolean;
 	includeAllLists?: boolean;
 	orderBy?: 'latest' | 'oldest' | 'recently_updated' | 'recently_completed';
 }
@@ -191,3 +192,21 @@ export interface IOccurrencesCursorBasedResponse {
 	hasMore: boolean;
 	occurrences: Array<ITaskOccurrenceDetails>;
 }
+
+// ===Notifications===
+
+export type IShowNotificationPayload = {
+	title: string;
+	body: string;
+	silent?: boolean;
+	notificationId?: string;
+};
+
+export type IShowNotificationResponse = {
+	ok: boolean;
+	message: string;
+};
+
+export type INotificationClickPayload = {
+	notificationId: string;
+};

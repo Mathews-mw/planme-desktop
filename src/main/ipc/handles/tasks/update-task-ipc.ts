@@ -22,6 +22,7 @@ import {
 	taskDefinitions,
 	taskOccurrences,
 } from '~/src/main/db/schema';
+import { taskNotificationScheduler } from '../../notifications/task-notification-scheduler-factory';
 
 const updateTaskSchema = z.object({
 	taskDefinitionId: z.string(),
@@ -211,6 +212,10 @@ ipcMain.handle(IPC.TASKS.UPDATE, async (_event, raw: IUpdateTaskRequest): Promis
 				task.occurrences = [TaskOccurrenceMapper.toDomain(newOccurrence)];
 			}
 		}
+
+		void taskNotificationScheduler.syncTaskDefinition(taskDefinition.id).catch((err) => {
+			console.error('Scheduler sync failed:', err);
+		});
 
 		return { success: true, data: task };
 	} catch (err) {

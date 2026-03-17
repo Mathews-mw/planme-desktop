@@ -15,6 +15,7 @@ import { RecurrenceRuleMapper } from '~/src/main/db/mappers/recurrence-rule-mapp
 import { recurrenceRules, taskDefinitions, taskOccurrences } from '~/src/main/db/schema';
 import { TaskOccurrencesPlanner } from '~/src/shared/recurrence-engine/task-occurrences-planner';
 import { recurrenceEndTypeSchema, recurrenceFrequencySchema } from '~/src/shared/types/recurrence-rule';
+import { taskNotificationScheduler } from '../../notifications/task-notification-scheduler-factory';
 
 const createTaskSchema = z.object({
 	definition: z.object({
@@ -143,6 +144,10 @@ ipcMain.handle(IPC.TASKS.CREATE, async (_event, raw: ICreateTaskRequest): Promis
 
 			task.occurrences = [TaskOccurrenceMapper.toDomain(taskOccurrence)];
 		}
+
+		void taskNotificationScheduler.syncTaskDefinition(taskDefinitionId).catch((err) => {
+			console.error('Scheduler sync failed:', err);
+		});
 
 		return { success: true, data: task };
 	} catch (err) {

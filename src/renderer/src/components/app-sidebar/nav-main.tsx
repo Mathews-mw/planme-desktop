@@ -18,11 +18,6 @@ interface IItemProps {
 export function NavMain() {
 	const items: Array<IItemProps> = [
 		{
-			title: 'Favorites',
-			url: '/favorites',
-			icon: IconStar,
-		},
-		{
 			title: 'Tasks',
 			url: '/tasks/tasks',
 			icon: IconSquareRoundedCheck,

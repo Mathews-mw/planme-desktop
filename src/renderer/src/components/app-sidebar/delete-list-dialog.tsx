@@ -52,7 +52,7 @@ export function DeleteListDialog({ taskList, open, onOpen }: IProps) {
 			onOpen(false);
 
 			if (taskList.slug === currentSlugLocation) {
-				router('/tasks');
+				router('/tasks/tasks');
 			}
 		} catch (error) {
 			console.error('IPC Communication Crash:', error);

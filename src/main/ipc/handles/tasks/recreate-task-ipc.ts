@@ -8,6 +8,7 @@ import { IpcResponse, IRecreateTaskRequest } from '~/src/shared/types/ipc';
 import { encodeWeekdays } from '~/src/shared/recurrence-engine/weekdays-bitmask';
 import { TaskOccurrenceMapper } from '~/src/main/db/mappers/task-occurrence-mapper';
 import { recurrenceRules, subtasks, taskDefinitions, taskOccurrences } from '~/src/main/db/schema';
+import { taskNotificationScheduler } from '../../notifications/task-notification-scheduler-factory';
 
 ipcMain.handle(IPC.TASKS.RECREATE, async (_event, raw: IRecreateTaskRequest): Promise<IpcResponse<ITask>> => {
 	const data = raw;
@@ -60,6 +61,10 @@ ipcMain.handle(IPC.TASKS.RECREATE, async (_event, raw: IRecreateTaskRequest): Pr
 		if (subtasksDb.length > 0) {
 			await db.insert(subtasks).values(subtasksDb);
 		}
+
+		void taskNotificationScheduler.syncTaskDefinition(data.task.taskDefinition.id).catch((err) => {
+			console.error('Scheduler sync failed:', err);
+		});
 
 		return { success: true, data: data.task };
 	} catch (err) {
